@@ -78,6 +78,10 @@ export function makeFetchStub(options: FetchStubOptions): FetchStub {
   return { fetch: stub as unknown as typeof fetch, telegramCalls, olxCalls };
 }
 
+/** ISO timestamp N hours in the past. Keeps age-sensitive fixtures from rotting. */
+export const hoursAgo = (hours: number): string =>
+  new Date(Date.now() - hours * 3_600_000).toISOString();
+
 /** Builds an offers payload shaped like the real /api/v1/offers response. */
 export function offersPayload(
   ads: Array<{ id: number; title?: string; created?: string; photos?: number }>,
@@ -88,7 +92,7 @@ export function offersPayload(
       url: `https://www.olx.ua/d/uk/obyavlenie/ad-${ad.id}.html`,
       title: ad.title ?? `Ad ${ad.id}`,
       description: 'Опис<br />другий рядок',
-      created_time: ad.created ?? '2026-08-09T15:00:00+03:00',
+      created_time: ad.created ?? hoursAgo(1),
       params: [
         { key: 'price', value: { value: 2300, currency: 'UAH', label: '2 300 грн.', arranged: false } },
         { key: 'state', value: { key: 'used', label: 'Вживане' } },

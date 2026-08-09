@@ -2,7 +2,7 @@ import { env } from 'cloudflare:test';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Env } from '../src/config';
 import { pollSources } from '../src/poller';
-import { applySchema, makeFetchStub, offersPayload, resetDb } from './helpers';
+import { applySchema, hoursAgo, makeFetchStub, offersPayload, resetDb } from './helpers';
 
 const DB = env.DB as D1Database;
 
@@ -134,8 +134,8 @@ describe('broadcasting', () => {
 
     const stub = makeFetchStub({
       offers: offersPayload([
-        { id: 20, title: 'newer', created: '2026-08-09T15:00:00+03:00' },
-        { id: 21, title: 'older', created: '2026-08-09T09:00:00+03:00' },
+        { id: 20, title: 'newer', created: hoursAgo(1) },
+        { id: 21, title: 'older', created: hoursAgo(5) },
       ]),
     });
     vi.stubGlobal('fetch', stub.fetch);
@@ -203,6 +203,73 @@ describe('broadcasting', () => {
     expect(stub.telegramCalls).toHaveLength(0);
     // Nothing was delivered, so nothing may be marked as seen.
     expect(await seenIds(sourceId)).toEqual([]);
+  });
+});
+
+describe('ad age', () => {
+  it('skips an old ad that OLX resurfaced via a refresh', async () => {
+    const sourceId = await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({
+      offers: offersPayload([
+        { id: 110, title: 'bumped', created: '2023-12-31T14:15:00+02:00' },
+        { id: 111, title: 'genuinely new', created: hoursAgo(2) },
+      ]),
+    });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    const captions = stub.telegramCalls
+      .filter((call) => call.method === 'sendMediaGroup')
+      .map((call) => String((call.body.media as Array<{ caption?: string }>)[0]?.caption));
+
+    expect(captions).toHaveLength(1);
+    expect(captions[0]).toContain('genuinely new');
+    // The stale ad must not be recorded either — it never reached a chat.
+    expect(await seenIds(sourceId)).toEqual([111]);
+  });
+
+  it('honours MAX_AD_AGE_HOURS', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 120, created: hoursAgo(5) }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ MAX_AD_AGE_HOURS: '2' }));
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(0);
+  });
+
+  it('drops an ad with an unparsable creation date', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 130, created: 'not-a-date' }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    expect(stub.telegramCalls).toHaveLength(0);
+  });
+
+  it('still records every ad on the first sweep, however old', async () => {
+    const sourceId = await seedSource(false);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({
+      offers: offersPayload([
+        { id: 140, created: '2023-12-31T14:15:00+02:00' },
+        { id: 141, created: hoursAgo(1) },
+      ]),
+    });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    expect(await seenIds(sourceId)).toEqual([140, 141]);
   });
 });
 

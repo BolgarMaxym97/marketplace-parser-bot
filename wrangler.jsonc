@@ -30,7 +30,8 @@
 		"PHOTO_SIZE": "1000x700",
 		"TIMEZONE": "Europe/Kyiv",
 		"RETENTION_PER_SOURCE": "500",
-		"MAX_FAILURES": "5"
+		"MAX_FAILURES": "5",
+		"MAX_AD_AGE_HOURS": "24"
 	},
 	"observability": {
 		"enabled": true

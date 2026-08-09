@@ -21,9 +21,23 @@ interface TickState {
   reserve: number;
 }
 
+const HOUR_MS = 3_600_000;
+
 /** Oldest first, so a chat reads chronologically. The API returns newest first. */
 const oldestFirst = (a: OlxAd, b: OlxAd): number =>
   Date.parse(a.createdTime) - Date.parse(b.createdTime);
+
+/**
+ * OLX orders a search by refresh time and pins promoted ads on top, so an ad
+ * created years ago resurfaces at the head of the feed the moment its seller
+ * bumps it. Being absent from seen_ads therefore does not mean "new" — only the
+ * creation date does. An unparsable date is treated as stale rather than risking
+ * a flood of ancient listings.
+ */
+const isRecent = (ad: OlxAd, cutoff: number): boolean => {
+  const created = Date.parse(ad.createdTime);
+  return Number.isFinite(created) && created >= cutoff;
+};
 
 /** Reports go to every owner. Returns how many subrequests it spent. */
 async function notifyOwners(telegram: TelegramClient, config: Config, text: string): Promise<number> {
@@ -77,8 +91,11 @@ async function processSource(
   // they go out once the bot is actually added somewhere.
   if (chats.length === 0) return;
 
-  const unseen = await filterUnseen(deps.db, source.id, ads.map((ad) => ad.id));
-  const fresh = ads.filter((ad) => unseen.has(ad.id)).sort(oldestFirst);
+  const cutoff = Date.now() - config.maxAdAgeHours * HOUR_MS;
+  const recent = ads.filter((ad) => isRecent(ad, cutoff));
+
+  const unseen = await filterUnseen(deps.db, source.id, recent.map((ad) => ad.id));
+  const fresh = recent.filter((ad) => unseen.has(ad.id)).sort(oldestFirst);
 
   for (const ad of fresh) {
     // Never start a broadcast we cannot finish: the ad stays unseen and is

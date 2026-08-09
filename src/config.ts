@@ -15,6 +15,7 @@ export interface Env {
   TIMEZONE?: string;
   RETENTION_PER_SOURCE?: string;
   MAX_FAILURES?: string;
+  MAX_AD_AGE_HOURS?: string;
 }
 
 export interface Config {
@@ -25,6 +26,8 @@ export interface Config {
   timezone: string;
   retentionPerSource: number;
   maxFailures: number;
+  /** How old an ad may be, by creation date, and still count as new. */
+  maxAdAgeHours: number;
   /** Everyone allowed to run commands. Reports go to all of them. */
   ownerChatIds: number[];
 }
@@ -78,6 +81,7 @@ export function readConfig(env: Env): Config {
     timezone: env.TIMEZONE || 'Europe/Kyiv',
     retentionPerSource: num(env.RETENTION_PER_SOURCE, 500),
     maxFailures: num(env.MAX_FAILURES, 5),
+    maxAdAgeHours: num(env.MAX_AD_AGE_HOURS, 24),
     ownerChatIds: parseOwnerIds(env.OWNER_CHAT_ID),
   };
 }
