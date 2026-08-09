@@ -2,6 +2,7 @@ import { readConfig, SUBREQUEST_RESERVE, type Config, type Env } from './config'
 import { activeChats, type ChatRow } from './db/chats';
 import { filterUnseen, markSeen, markSeenBatch } from './db/seen';
 import {
+  advanceWatermark,
   markFailure,
   markInitialized,
   markSuccess,
@@ -27,16 +28,25 @@ const HOUR_MS = 3_600_000;
 const oldestFirst = (a: OlxAd, b: OlxAd): number =>
   Date.parse(a.createdTime) - Date.parse(b.createdTime);
 
+/** Creation time in unix seconds, or 0 when OLX sent something unparsable. */
+const createdAt = (ad: OlxAd): number => {
+  const parsed = Date.parse(ad.createdTime);
+  return Number.isFinite(parsed) ? Math.floor(parsed / 1000) : 0;
+};
+
 /**
  * OLX orders a search by refresh time and pins promoted ads on top, so an ad
  * created years ago resurfaces at the head of the feed the moment its seller
  * bumps it. Being absent from seen_ads therefore does not mean "new" — only the
  * creation date does. An unparsable date is treated as stale rather than risking
  * a flood of ancient listings.
+ *
+ * The floor is inclusive so that ads sharing a second with the watermark are not
+ * lost; seen_ads is what keeps them from going out twice.
  */
-const isRecent = (ad: OlxAd, cutoff: number): boolean => {
-  const created = Date.parse(ad.createdTime);
-  return Number.isFinite(created) && created >= cutoff;
+const isRecent = (ad: OlxAd, floor: number): boolean => {
+  const created = createdAt(ad);
+  return created > 0 && created >= floor;
 };
 
 /** Reports go to every owner. Returns how many subrequests it spent. */
@@ -63,6 +73,11 @@ async function initializeSource(
 ): Promise<void> {
   await markSeenBatch(db, source.id, ads.map((ad) => ad.id));
   await markInitialized(db, source.id);
+
+  // Everything already on the feed counts as delivered, so the watermark starts
+  // at the newest of them and nothing older can slip in later.
+  const newest = ads.reduce((max, ad) => Math.max(max, createdAt(ad)), 0);
+  if (newest > 0) await advanceWatermark(db, source.id, newest);
 
   state.budget -= await notifyOwners(
     telegram,
@@ -91,17 +106,25 @@ async function processSource(
   // they go out once the bot is actually added somewhere.
   if (chats.length === 0) return;
 
-  const cutoff = Date.now() - config.maxAdAgeHours * HOUR_MS;
-  const recent = ads.filter((ad) => isRecent(ad, cutoff));
+  // The watermark rules out anything already overtaken; the age cutoff covers a
+  // source that has never delivered, and caps how far back a stale watermark
+  // could reach.
+  const cutoff = Math.floor((Date.now() - config.maxAdAgeHours * HOUR_MS) / 1000);
+  const floor = Math.max(cutoff, source.last_created_at ?? 0);
+  const recent = ads.filter((ad) => isRecent(ad, floor));
 
   const unseen = await filterUnseen(deps.db, source.id, recent.map((ad) => ad.id));
   const fresh = recent.filter((ad) => unseen.has(ad.id)).sort(oldestFirst);
 
+  // Oldest first means every ad left in the loop is newer than the one just sent,
+  // so a tick cut short by the budget leaves the watermark below them.
+  let delivered = 0;
+
   for (const ad of fresh) {
     // Never start a broadcast we cannot finish: the ad stays unseen and is
     // picked up whole on the next tick.
-    if (state.budget - chats.length < state.reserve) return;
-    if (state.sends >= config.maxSendsPerTick) return;
+    if (state.budget - chats.length < state.reserve) break;
+    if (state.sends >= config.maxSendsPerTick) break;
 
     const result = await broadcastAd(deps, chats, ad);
     state.budget -= result.spent;
@@ -109,14 +132,19 @@ async function processSource(
 
     if (result.rateLimited) {
       state.rateLimited = true;
-      return;
+      break;
     }
 
     // Recorded only after the broadcast, and only if at least one chat took it.
     // The reverse order would lose an ad forever on a mid-send crash; this way
     // the worst case is a duplicate.
-    if (result.delivered > 0) await markSeen(deps.db, source.id, ad.id);
+    if (result.delivered > 0) {
+      await markSeen(deps.db, source.id, ad.id);
+      delivered = Math.max(delivered, createdAt(ad));
+    }
   }
+
+  if (delivered > 0) await advanceWatermark(deps.db, source.id, delivered);
 }
 
 export async function pollSources(env: Env): Promise<void> {

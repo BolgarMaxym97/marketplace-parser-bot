@@ -36,6 +36,15 @@ const seenIds = async (sourceId: number): Promise<number[]> => {
   return results.map((row) => row.ad_id);
 };
 
+const watermark = async (sourceId: number): Promise<number | null> => {
+  const row = await DB.prepare('SELECT last_created_at FROM sources WHERE id = ?')
+    .bind(sourceId)
+    .first<{ last_created_at: number | null }>();
+  return row!.last_created_at;
+};
+
+const unix = (iso: string): number => Math.floor(Date.parse(iso) / 1000);
+
 const mediaGroups = (calls: Array<{ method: string }>): number =>
   calls.filter((call) => call.method === 'sendMediaGroup').length;
 
@@ -270,6 +279,124 @@ describe('ad age', () => {
     await pollSources(testEnv());
 
     expect(await seenIds(sourceId)).toEqual([140, 141]);
+  });
+});
+
+describe('watermark', () => {
+  it('starts at the newest ad of the first sweep', async () => {
+    const sourceId = await seedSource(false);
+    await seedChats(-100);
+
+    const newest = hoursAgo(1);
+    const stub = makeFetchStub({
+      offers: offersPayload([{ id: 200, created: hoursAgo(6) }, { id: 201, created: newest }]),
+    });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    expect(await watermark(sourceId)).toBe(unix(newest));
+  });
+
+  it('skips an ad created before the last one delivered', async () => {
+    const sourceId = await seedSource(true);
+    await seedChats(-100);
+
+    const first = makeFetchStub({ offers: offersPayload([{ id: 210, created: hoursAgo(2) }]) });
+    vi.stubGlobal('fetch', first.fetch);
+    await pollSources(testEnv());
+    expect(mediaGroups(first.telegramCalls)).toBe(1);
+
+    // Unseen, well inside the age window, but created before the ad already sent.
+    const second = makeFetchStub({
+      offers: offersPayload([{ id: 211, created: hoursAgo(5) }, { id: 210, created: hoursAgo(2) }]),
+    });
+    vi.stubGlobal('fetch', second.fetch);
+    await pollSources(testEnv());
+
+    expect(mediaGroups(second.telegramCalls)).toBe(0);
+    expect(await seenIds(sourceId)).toEqual([210]);
+  });
+
+  it('lets an ad newer than the watermark through', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    const first = makeFetchStub({ offers: offersPayload([{ id: 220, created: hoursAgo(3) }]) });
+    vi.stubGlobal('fetch', first.fetch);
+    await pollSources(testEnv());
+
+    const second = makeFetchStub({
+      offers: offersPayload([{ id: 221, title: 'later', created: hoursAgo(1) }]),
+    });
+    vi.stubGlobal('fetch', second.fetch);
+    await pollSources(testEnv());
+
+    expect(mediaGroups(second.telegramCalls)).toBe(1);
+  });
+
+  it('does not overtake ads the subrequest budget left undelivered', async () => {
+    const sourceId = await seedSource(true);
+    await seedChats(-100, -200);
+
+    // Captured once: the sends are spaced out, so calling hoursAgo() twice for
+    // the same ad would yield two different timestamps.
+    const second231 = hoursAgo(3);
+    const offers = offersPayload([
+      { id: 230, created: hoursAgo(4) },
+      { id: 231, created: second231 },
+      { id: 232, created: hoursAgo(2) },
+      { id: 233, created: hoursAgo(1) },
+    ]);
+
+    // 10 total − 1 OLX fetch − 5 reserve leaves room for 2 broadcasts of 2 chats.
+    const first = makeFetchStub({ offers });
+    vi.stubGlobal('fetch', first.fetch);
+    await pollSources(testEnv({ SUBREQUEST_BUDGET: '10' }));
+
+    expect(await seenIds(sourceId)).toEqual([230, 231]);
+    expect(await watermark(sourceId)).toBe(unix(second231));
+
+    const second = makeFetchStub({ offers });
+    vi.stubGlobal('fetch', second.fetch);
+    await pollSources(testEnv());
+
+    expect(await seenIds(sourceId)).toEqual([230, 231, 232, 233]);
+    // Eight sends, each behind SEND_DELAY_MS, outlast the default timeout.
+  }, 30_000);
+
+  it('keeps an ad sharing its second with the watermark', async () => {
+    const sourceId = await seedSource(true);
+    await seedChats(-100, -200);
+
+    const sameSecond = hoursAgo(2);
+    const offers = offersPayload([
+      { id: 240, created: sameSecond },
+      { id: 241, created: sameSecond },
+    ]);
+
+    // 8 total − 1 OLX fetch − 5 reserve leaves room for exactly one broadcast.
+    const first = makeFetchStub({ offers });
+    vi.stubGlobal('fetch', first.fetch);
+    await pollSources(testEnv({ SUBREQUEST_BUDGET: '8' }));
+    expect(await seenIds(sourceId)).toEqual([240]);
+
+    const second = makeFetchStub({ offers });
+    vi.stubGlobal('fetch', second.fetch);
+    await pollSources(testEnv());
+
+    expect(await seenIds(sourceId)).toEqual([240, 241]);
+  }, 30_000);
+
+  it('stays put when nothing was delivered', async () => {
+    const sourceId = await seedSource(true);
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 250 }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    expect(await watermark(sourceId)).toBeNull();
   });
 });
 

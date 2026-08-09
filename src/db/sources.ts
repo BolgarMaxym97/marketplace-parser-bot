@@ -9,6 +9,8 @@ export interface SourceRow {
   last_error: string | null;
   fail_count: number;
   created_at: number;
+  /** Creation time of the newest ad already broadcast, unix seconds. */
+  last_created_at: number | null;
 }
 
 const now = (): number => Math.floor(Date.now() / 1000);
@@ -73,6 +75,26 @@ export async function setEnabled(db: D1Database, id: number, enabled: boolean): 
 
 export async function markInitialized(db: D1Database, id: number): Promise<void> {
   await db.prepare('UPDATE sources SET initialized = 1 WHERE id = ?').bind(id).run();
+}
+
+/**
+ * Raises the watermark, never lowers it. A tick cut short by the subrequest
+ * budget must not push the mark past ads it never delivered, and two ticks
+ * racing must not let the older one win.
+ */
+export async function advanceWatermark(
+  db: D1Database,
+  id: number,
+  createdAt: number,
+): Promise<void> {
+  await db
+    .prepare(
+      `UPDATE sources
+       SET last_created_at = ?
+       WHERE id = ? AND (last_created_at IS NULL OR last_created_at < ?)`,
+    )
+    .bind(createdAt, id, createdAt)
+    .run();
 }
 
 export async function markSuccess(db: D1Database, id: number): Promise<void> {
