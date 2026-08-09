@@ -1,0 +1,41 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "olx-parser-bot",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-08-01",
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "olx-parser-bot",
+			"database_id": "abcff317-f033-4ed6-b2d7-999b150bd0e2",
+			"migrations_dir": "migrations"
+		},
+		{
+			"binding": "olx_parser_bot",
+			"database_name": "olx-parser-bot",
+			"database_id": "abcff317-f033-4ed6-b2d7-999b150bd0e2"
+		}
+	],
+	"triggers": {
+		// */5 — poll sources; 0 3 — nightly seen_ads retention
+		"crons": [
+			"*/5 * * * *",
+			"0 3 * * *"
+		]
+	},
+	"vars": {
+		"MAX_SOURCES_PER_TICK": "10",
+		"MAX_SENDS_PER_TICK": "30",
+		"SUBREQUEST_BUDGET": "50",
+		"PHOTO_SIZE": "1000x700",
+		"TIMEZONE": "Europe/Kyiv",
+		"RETENTION_PER_SOURCE": "500",
+		"MAX_FAILURES": "5"
+	},
+	"observability": {
+		"enabled": true
+	}
+	// Secrets (npx wrangler secret put <NAME>):
+	//   BOT_TOKEN, WEBHOOK_SECRET
+	//   OWNER_CHAT_ID — one id, or several separated by commas: "111,222"
+}

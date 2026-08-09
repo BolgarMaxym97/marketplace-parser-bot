@@ -1,0 +1,23 @@
+{
+  "name": "olx-parser-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --test-scheduled",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --exclude 'test/live.test.ts'",
+    "test:live": "vitest run test/live.test.ts",
+    "test:watch": "vitest --exclude 'test/live.test.ts'",
+    "migrate:local": "wrangler d1 migrations apply olx-parser-bot --local",
+    "migrate:remote": "wrangler d1 migrations apply olx-parser-bot --remote"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.20.3",
+    "@cloudflare/workers-types": "^5.20260809.1",
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.120.0"
+  }
+}

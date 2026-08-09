@@ -1,0 +1,8 @@
+# Copy to .dev.vars for `wrangler dev`. .dev.vars is gitignored — never commit real values.
+# In production these are set with `wrangler secret put <NAME>`, not from this file.
+
+BOT_TOKEN="123456789:replace-with-the-token-from-BotFather"
+WEBHOOK_SECRET="replace-with-a-random-string"
+
+# One chat id, or several separated by commas: "111,222"
+OWNER_CHAT_ID="0"

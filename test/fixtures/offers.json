@@ -1,0 +1,1751 @@
+{
+ "data": [
+  {
+   "id": 895955259,
+   "url": "https://www.olx.ua/d/uk/obyavlenie/new-nintendo-3ds-xlll-na-vash-smak-IDYDkTh.html",
+   "title": "New Nintendo 3DS XL(LL) - на ваш смак",
+   "last_refresh_time": "2026-08-09T13:40:27+03:00",
+   "created_time": "2025-08-07T16:41:13+03:00",
+   "valid_to_time": "2026-08-12T22:34:34+03:00",
+   "pushup_time": "2026-08-09T13:40:27+03:00",
+   "omnibus_pushup_time": "2026-08-09T13:40:27+03:00",
+   "description": "Оригінальні консолі з Японії<br />\n<br />\n(список постійно змінюється та оновлюється у моєму телеграм магазині https://t.me/retro_naum)<br />\n<br />\nСаме за посиланням вище обираєте консоль і тільки потім пишіть з приводу покупку.<br />\n<br />\nКомплектація:<br />\nКонсоль<br />\nКабель живлення<br />\nSD-картка — за додаткову плату<br />\n<br />\nЦіна вказана за блакитну <br />\n<br />\nІнші варіанти та ціни — за посиланням нижче.<br />\n<br />\nФото та відеоогляд:<br />\n<br />\nhttps://t.me/retro_naum/1214<br />\n<br />\n(перейдіть за посиланням і натисніть на назву консолі — вас перенаправить на оголошення з фото та відео) <br />\n<br />\nДоставка OLX: +5% до ціни, без комісії при оплаті на ФОП (працюю офіційно, плачу податки)<br />\n<br />\nУвага.<br />\nПишіть лише після того, як:<br />\n<br />\n1. Дочитали оголошення до кінця.<br />\n2. Переглянули всі фото та відео.<br />\n3. Вас усе влаштовує.<br />\n<br />\nЯ — найбільший ретромагазин РЕТРОПОРТАТИВОК в Україні (у телеграмі retro_naum) <br />\n<br />\nОплата приймається виключно за реквізитами ФОП.<br />\n<br />\nПерегляньте інші мої оголошення на OLX або в Telegram:<br />\nhttps://t.me/retro_naum<br />\n<br />\nНаявність інших кольорів і варіантів у коробках уточнюйте в Telegram: N_MariOne<br />\n<br />\nВідгуки: https://t.me/RetroN_UA/8<br />\n<br />\nСпільноти:<br />\n<br />\nМагазин (найбільший ретромагазин України): https://t.me/retro_naum<br />\n<br />\nПерша ретроспільнота України: https://t.me/RetroN_UA<br />\n<br />\nЧіпування консолей та ремонт <br />\nhttps://t.me/RetroN_UA/121",
+   "promotion": {
+    "highlighted": true,
+    "urgent": false,
+    "top_ad": true,
+    "options": [
+     "bundle_premium"
+    ],
+    "b2c_ad_page": false,
+    "premium_ad_page": false
+   },
+   "params": [
+    {
+     "key": "price",
+     "name": "Ціна за 1 шт.",
+     "type": "price",
+     "value": {
+      "value": 12163,
+      "type": "price",
+      "arranged": false,
+      "budget": false,
+      "currency": "UAH",
+      "negotiable": false,
+      "converted_value": null,
+      "previous_value": null,
+      "converted_previous_value": null,
+      "converted_currency": null,
+      "label": "12 163 грн.",
+      "previous_label": null
+     }
+    },
+    {
+     "key": "state",
+     "name": "Стан",
+     "type": "select",
+     "value": {
+      "key": "used",
+      "label": "Вживане"
+     }
+    },
+    {
+     "key": "console_manufacturers",
+     "name": "Тип приставки",
+     "type": "select",
+     "value": {
+      "key": "2275",
+      "label": "Інша"
+     }
+    },
+    {
+     "key": "for_gaming",
+     "name": "Підійде геймерам",
+     "type": "checkbox",
+     "value": {
+      "key": "1",
+      "label": "Підійде геймерам"
+     }
+    }
+   ],
+   "key_params": [],
+   "business": true,
+   "user": {
+    "id": 1001,
+    "created": "2015-05-18T14:01:19+03:00",
+    "other_ads_enabled": true,
+    "name": "Продавець 1",
+    "logo": null,
+    "logo_ad_page": null,
+    "social_network_account_type": "facebook",
+    "photo": null,
+    "banner_mobile": null,
+    "banner_desktop": null,
+    "company_name": "",
+    "about": "",
+    "b2c_business_page": false,
+    "is_online": false,
+    "last_seen": "2026-08-04T16:21:08+03:00",
+    "seller_type": null,
+    "uuid": "00000000-0000-4000-8000-000000000001"
+   },
+   "status": "active",
+   "contact": {
+    "name": "Продавець 1",
+    "phone": false,
+    "chat": true,
+    "negotiation": false,
+    "courier": true
+   },
+   "map": {
+    "zoom": 12,
+    "lat": 49.83524,
+    "lon": 24.03517,
+    "radius": 2,
+    "show_detailed": false
+   },
+   "location": {
+    "city": {
+     "id": 176,
+     "name": "Львів",
+     "normalized_name": "lvov"
+    },
+    "district": {
+     "id": 127,
+     "name": "Галицький"
+    },
+    "region": {
+     "id": 5,
+     "name": "Львівська область",
+     "normalized_name": "lv"
+    }
+   },
+   "photos": [
+    {
+     "id": 4643924580,
+     "filename": "m94r92fje6mh1-UA",
+     "rotation": 0,
+     "width": 1397,
+     "height": 1397,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/m94r92fje6mh1-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4643924581,
+     "filename": "qed2w5s0jlpw-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/qed2w5s0jlpw-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4643924582,
+     "filename": "fo8zmog1ztp8-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/fo8zmog1ztp8-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4643924583,
+     "filename": "4edpkir7bn4n1-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/4edpkir7bn4n1-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4643924584,
+     "filename": "d2fswowpw93f-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/d2fswowpw93f-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4643924585,
+     "filename": "pxp6bfwq94hz2-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/pxp6bfwq94hz2-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4643924586,
+     "filename": "aa9zn9kx6ew61-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/aa9zn9kx6ew61-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4643924587,
+     "filename": "k8igd8uns0t11-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/k8igd8uns0t11-UA/image;s={width}x{height}"
+    }
+   ],
+   "partner": null,
+   "category": {
+    "id": 101,
+    "type": "electronics"
+   },
+   "delivery": {
+    "rock": {
+     "offer_id": null,
+     "active": false,
+     "mode": null
+    }
+   },
+   "safedeal": {
+    "weight": 2,
+    "weight_grams": 2000,
+    "status": "active",
+    "safedeal_blocked": false,
+    "allowed_quantity": []
+   },
+   "shop": {
+    "subdomain": null
+   },
+   "isGpsrAvailable": false,
+   "offer_type": "offer",
+   "protect_phone": false
+  },
+  {
+   "id": 436746802,
+   "url": "https://www.olx.ua/d/uk/obyavlenie/igrovaya-pristavka-hamy-4-350-igr-dendi-8-bit-dendy-8-bit-sega-mega-2-IDtyxNg.html",
+   "title": "Игровая приставка HAMY 4 350 игр Денди 8 бит Dendy 8 Bit Sega Mega 2",
+   "last_refresh_time": "2026-07-27T21:18:01+03:00",
+   "created_time": "2017-07-12T14:01:55+03:00",
+   "valid_to_time": "2026-08-26T21:17:59+03:00",
+   "pushup_time": "2024-04-01T12:49:13+03:00",
+   "description": "Интернет магазин    LPX.com.ua    ПРЕДСТАВЛЯЕТ уникальную ретро игровую приставку Dendy 8 bit плюс Sega Mega Drive 2 со встроенными 350 играми и дополнительной поддержкой карты памяти, для еще большего количество игр и еще большего погружения в ретро мир. <br />\n<br />\nВ комплекте вы уже получаете такие игры, как Супер Марио, Танчики, Чип и Дейл, Аладдин, Мортал Комбат, Соник, Бугермен и многое многое другое. Все встроенные игры УНИКАЛЬНЫЕ, без повторов!!!<br />\n<br />\nВСЕ ПРИСТАВКИ НОВЫЕ!!! С ГАРАНТИЕЙ!!!<br />\n<br />\nПосмотреть, выбрать и купить можно в нашем магазине в Киеве по ул. Вадима Гетьмана 17 это район метро Шулявская, практически напротив ТРЦ Космополит<br />\n<br />\nВСЕГДА САМЫЕ ЛУЧШИЕ и актуальные ЦЕНЫ!!!<br />\n<br />\nЗаказы принимает 24/7 без перерывов и выходных!!!<br />\n<br />\nДоставка:<br />\nНовая Почта.<br />\nОтправляем по всей Украине!<br />\nСАМОВЫВОЗ Киев..ул. Вадима Гетьмана 17 (это район метро Шулявка, практически напротив ТРЦ Большевик)<br />\n<br />\nКомплект:<br />\nИгровая приставка Hamy4<br />\n2 джойстика<br />\nБлок питания, AV-кабель<br />\n<br />\nПо Киеву самовывоз. <br />\n<br />\nСАМАЯ НИЗКАЯ ЦЕНА В УКРАИНЕ!!!<br />\n<br />\nМЫ продаем НОВЫЕ игровые приставки HAMY 4, со встроенными 350 играми Денди 8 Бит Dendy 8 Bit + Сега 16 Бит Sega Mega Drive 2 16 Бит <br />\nСреди них - Супер Марио, Танчики, Мортал Кобат, Street Fighter, Черепашки ниндзя, Чип и Дейл, Черный плащ и многое многое другое.<br />\n<br />\nПолный список игр смотрите на сайте нашего магазина вот по этой ссылке  LPX.com.ua<br />\n<br />\nЗВОНИТЕ<br />\n(09**********83 <br />\n(09**********23 <br />\n(09**********40<br />\n<br />\nРАБОТАЕМ КРУГЛОСУТОЧНО. ЗВОНИТЕ, ПИШИТЕ!!! ЗАКАЗЫ НА САЙТЕ МОЖНО ОФОРМИТЬ КРУГЛОСУТОЧНО!!!<br />\n<br />\nСПИСОК ВСТРОЕННЫХ ИГР<br />\n<br />\nSega игры (16 bit)<br />\n<br />\n 1 A Bug's Life <br />\n 2 Addams Family <br />\n 3 Aero Acro Bat 2<br />\n 4 After Burner 2<br />\n 5 Aladdin<br />\n 6 Alien 3<br />\n 7 Alien Soldier<br />\n 8 Andretti racing<br />\n 9 Anlmnlacs<br />\n 10 Ariel Mermaid<br />\n 11 Asterix Great Rescue<br />\n 12 Asterix Power Gods<br />\n 13 Back Future<br />\n 14 Barbie Super Model<br />\n 15 Bare Knuckle 3<br />\n 16 Bare Knuckle<br />\n 17 Batman Forever<br />\n 18 Batman Returns<br />\n 19 Batman Revenge Joker<br />\n 20 Batman Robin<br />\n 21 Batman<br />\n 22 Battle Toads <br />\n 23 Battleship<br />\n 24 Battletank<br />\n 25 Battletech<br />\n 26 Battletoads Double Dragon<br />\n 27 Beauty Beast Belle's Quest<br />\n 28 Beauty Beast Roar Beast<br />\n 29 Best of the Best<br />\n 30 Biockout<br />\n 31 Bomber<br />\n 32 Boogerman<br />\n 33 Boxing<br />\n 34 Bubba'n'Stix<br />\n 35 Bugs Bunny in Double Trouble<br />\n 36 Caliber Fifty<br />\n 37 Cannon Fodder<br />\n 38 Captain America<br />\n 39 Castle Illusion<br />\n 40 Castlevania Bloodlues<br />\n 41 Championship Pool<br />\n 42 Chase HQ 2<br />\n 43 Chess<br />\n 44 Clue<br />\n 45 Combat Cars<br />\n 46 Comix Zone<br />\n 47 Comm Andos<br />\n 48 Contra<br />\n 49 Cool Spot 2<br />\n 50 Cool Spot<br />\n 51 Cutthroath Island<br />\n 52 Daffy Duck<br />\n 53 Dark Water<br />\n 54 Demolition Man<br />\n 55 Desert Demolition<br />\n 56 Desert Strike<br />\n 57 Donkey Kong<br />\n 58 Doom Troopers<br />\n 59 Double Dragon 2<br />\n 60 Double Dragon 3<br />\n 61 Double Dragon<br />\n 62 Duke Nukem 3D<br />\n 63 Dune 2<br />\n 64 Dynamite Duke<br />\n 65 Earnest Evans<br />\n 66 Earthworm Jim<br />\n 67 Earthworw Jam 2<br />\n 68 Ecco JR<br />\n 69 Ecco<br />\n 70 F1<br />\n 71 Fantasia<br />\n 72 Fantastic Dizzy<br />\n 73 Fire Shark<br />\n 74 Flintstones<br />\n 75 Fun Car Rally<br />\n 76 General Chaos<br />\n 77 Ghost Busters<br />\n 78 Golden Axe 2<br />\n 79 Golden Axe 3<br />\n 80 Golden Axe<br />\n 81 Goofy's<br />\n 82 Greendog<br />\n 83 Hockey 93<br />\n 84 Home Alone 2<br />\n 85 Hook<br />\n 86 James Bond<br />\n 87 Joe Mac<br />\n 88 Judge Dredd<br />\n 89 Jungle Book<br />\n 90 Jurassic Park 2<br />\n 91 Jurassic Park<br />\n 92 Kolobok<br />\n 93 Lion King 2<br />\n 94 Lion King 3<br />\n 95 Lion King<br />\n 96 Lost Viking<br />\n 97 Lotus 2<br />\n 98 Lotus Turbo Challenge<br />\n 99 Mafia<br />\n 100 Micro Machines 2<br />\n 101 Micro Machines<br />\n 102 Midnight Resistance<br />\n 103 Mortal Kombat 3<br />\n 104 Mortal Kombat 4<br />\n 105 Mortal Kombat 5<br />\n 106 Mortal Kombat 8<br />\n 107 Mr Nutz<br />\n 108 MS Pacman<br />\n 109 Pink Goes Hollywood<br />\n 110 Pinocchio<br />\n 111 Pirates<br />\n 112 Prince of Persia<br />\n 113 Pro Am Championship<br />\n 114 Quack Shot<br />\n 115 Road Rash 2<br />\n 116 Road Rash 3<br />\n 117 Road Rash<br />\n 118 Robocop 3<br />\n 119 Rock n Roll<br />\n 120 Rolo To The Rescue<br />\n 121 Shinobi 3<br />\n 122 Simpsons<br />\n 123 Smurfs<br />\n 124 Sonic 2<br />\n 125 Sonic 3<br />\n 126 Sonic 3D Blast<br />\n 127 Sonic 4<br />\n 128 Sonic Spinball<br />\n 129 Sonic<br />\n 130 Spider Man X-Men<br />\n 131 Spider Man<br />\n 132 Squirrel King<br />\n 133 Sunset Riders<br />\n 134 Super Hang On<br />\n 135 Super Mario Bros 2<br />\n 136 Super Mario Bros<br />\n 137 Super Off Road<br />\n 138 Superman 2<br />\n 139 Sylvester Tweety<br />\n 140 Tale Spin<br />\n 141 Taz Mania<br />\n 142 Teenage Hyperstone Heist<br />\n 143 Teenage Tournament Fighters<br />\n 144 Terminator 2<br />\n 145 Terminator<br />\n 146 Test Drive II<br />\n 147 Tetris<br />\n 148 Theme Park <br />\n 149 Tiny Toon<br />\n 150 Tom Jerry<br />\n 151 Top Gear 2<br />\n 152 Toy Story<br />\n 153 Turbo Outrun<br />\n 154 Valis 3<br />\n 155 Valis<br />\n 156 Vectorman<br />\n 157 World Of Illusion<br />\n 158 X Men 2<br />\n 159 X Men<br />\n 160 Zero Tolerance<br />\n<br />\nDendy игры (8 bit)<br />\n<br />\n 1 1942<br />\n 2 Action in New York <br />\n 3 Addams Family<br />\n 4 Adventure Island 2<br />\n 5 Adventure Island 3<br />\n 6 Adventure Island 4<br />\n 7 Airwolf <br />\n 8 Aladdin<br />\n 9 Alfred Chicken <br />\n 10 Alien 3<br />\n 11 Arctic <br />\n 12 Arcanoid<br />\n 13 B-Wings<br />\n 14 Back to",
+   "promotion": {
+    "highlighted": false,
+    "urgent": false,
+    "top_ad": true,
+    "options": [],
+    "b2c_ad_page": false,
+    "premium_ad_page": false
+   },
+   "params": [
+    {
+     "key": "price",
+     "name": "Ціна за 1 шт.",
+     "type": "price",
+     "value": {
+      "value": 1300,
+      "type": "price",
+      "arranged": false,
+      "budget": false,
+      "currency": "UAH",
+      "negotiable": false,
+      "converted_value": null,
+      "previous_value": null,
+      "converted_previous_value": null,
+      "converted_currency": null,
+      "label": "1 300 грн.",
+      "previous_label": null
+     }
+    },
+    {
+     "key": "state",
+     "name": "Стан",
+     "type": "select",
+     "value": {
+      "key": "new",
+      "label": "Нове"
+     }
+    },
+    {
+     "key": "console_manufacturers",
+     "name": "Тип приставки",
+     "type": "select",
+     "value": {
+      "key": "2270",
+      "label": "Nintendo DS"
+     }
+    }
+   ],
+   "key_params": [],
+   "business": true,
+   "user": {
+    "id": 1002,
+    "created": "2017-05-25T17:07:43+03:00",
+    "other_ads_enabled": true,
+    "name": "Продавець 2",
+    "logo": null,
+    "logo_ad_page": null,
+    "social_network_account_type": null,
+    "photo": null,
+    "banner_mobile": null,
+    "banner_desktop": null,
+    "company_name": "",
+    "about": "",
+    "b2c_business_page": false,
+    "is_online": false,
+    "last_seen": "2026-08-04T13:14:40+03:00",
+    "seller_type": null,
+    "uuid": "00000000-0000-4000-8000-000000000002"
+   },
+   "status": "active",
+   "contact": {
+    "name": "Продавець 2",
+    "phone": true,
+    "chat": true,
+    "negotiation": false,
+    "courier": true
+   },
+   "map": {
+    "zoom": 11,
+    "lat": 50.41313,
+    "lon": 30.44339,
+    "radius": 4,
+    "show_detailed": false
+   },
+   "location": {
+    "city": {
+     "id": 268,
+     "name": "Київ",
+     "normalized_name": "kiev"
+    },
+    "district": {
+     "id": 17,
+     "name": "Солом'янський"
+    },
+    "region": {
+     "id": 25,
+     "name": "Київська область",
+     "normalized_name": "ko"
+    }
+   },
+   "photos": [
+    {
+     "id": 1788349674,
+     "filename": "5f7bnuny9wc32-UA",
+     "rotation": 0,
+     "width": 500,
+     "height": 500,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/5f7bnuny9wc32-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 1788349675,
+     "filename": "vmhbkrzaut5l1-UA",
+     "rotation": 0,
+     "width": 500,
+     "height": 500,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/vmhbkrzaut5l1-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 1788349676,
+     "filename": "bocui3eftjo7-UA",
+     "rotation": 0,
+     "width": 500,
+     "height": 500,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/bocui3eftjo7-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 1788349677,
+     "filename": "ziz18h56f0sn2-UA",
+     "rotation": 0,
+     "width": 500,
+     "height": 500,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/ziz18h56f0sn2-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 1788349678,
+     "filename": "hzai51vhf3zi-UA",
+     "rotation": 0,
+     "width": 500,
+     "height": 500,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/hzai51vhf3zi-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 1788349679,
+     "filename": "hap7unm1fcge-UA",
+     "rotation": 0,
+     "width": 500,
+     "height": 500,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/hap7unm1fcge-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 1788349680,
+     "filename": "n7s3iezn20qw1-UA",
+     "rotation": 0,
+     "width": 500,
+     "height": 500,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/n7s3iezn20qw1-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 1788349681,
+     "filename": "glcenm3i3iwn-UA",
+     "rotation": 0,
+     "width": 500,
+     "height": 500,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/glcenm3i3iwn-UA/image;s={width}x{height}"
+    }
+   ],
+   "partner": null,
+   "category": {
+    "id": 101,
+    "type": "electronics"
+   },
+   "delivery": {
+    "rock": {
+     "offer_id": null,
+     "active": false,
+     "mode": null
+    }
+   },
+   "safedeal": {
+    "weight": 1,
+    "weight_grams": 500,
+    "status": "active",
+    "safedeal_blocked": false,
+    "allowed_quantity": []
+   },
+   "shop": {
+    "subdomain": null
+   },
+   "isGpsrAvailable": false,
+   "offer_type": "offer",
+   "protect_phone": false
+  },
+  {
+   "id": 925941893,
+   "url": "https://www.olx.ua/d/uk/obyavlenie/new-nintendo-3ds-ll-xl-metallic-black-komplekt-garniy-stan-ID10F9MF.html",
+   "title": "New Nintendo 3ds LL/XL Metallic Black.  Комплект.  Гарний стан.",
+   "last_refresh_time": "2026-08-09T13:11:47+03:00",
+   "created_time": "2026-06-10T18:38:08+03:00",
+   "valid_to_time": "2026-09-08T13:11:46+03:00",
+   "pushup_time": null,
+   "description": "New Nintendo 3ds LL/XL Metallic Black.<br />\n<br />\n • По корпусу в гарному стані майже без ознаків використання.<br />\n• Дисплеї яскраві не пожовклі, без подряпин.<br />\n• Акумулятор в хорошому стані. Тримає добре.<br />\n• Функції: 3D, сенсор, мікрофон, динаміки, кнопки, стік - працюють чудово.<br />\n-Із нюансів: не працює камера (на ігровий процес не впливає).<br />\n<br />\nКОМПЛЕКТАЦІЯ:<br />\n-Консоль,<br />\n-Оригінальний стилус,<br />\n-AR карти,<br />\n-Документація,<br />\n-Коробка.<br />\n<br />\n• Додатково можна придбати Блок живлення 220v. від \"Nintendo\" з кабелем.<br />\n<br />\n*Відправка накладеним платежем, передплата або OLX доставка (буде трохи дорожче, так як OLX бере комісію за успішні угоди)<br />\n<br />\n• Телеграм Ігрового: https://t.me/zhu_lya<br />\n<br />\n• Інстаграм: www.instagram.com/retro_game_ua<br />\n<br />\nТакож дивіться інші оголошення є багато цікавого...<br />\n<br />\n• Купуючи в Нас Ви можете бути впевнені що отримаєте якісний товар. <br />\n<br />\n• Всі консолі та комплектуючі ретельно перевіряються перед відправкою.<br />\n<br />\n• Швидка відправка.<br />\n<br />\n• Доступна ціна.<br />\n<br />\n• Підтримка в налаштуванні/користуванні/підключення консолі.",
+   "promotion": {
+    "highlighted": false,
+    "urgent": false,
+    "top_ad": false,
+    "options": [],
+    "b2c_ad_page": false,
+    "premium_ad_page": false
+   },
+   "params": [
+    {
+     "key": "price",
+     "name": "Ціна за 1 шт.",
+     "type": "price",
+     "value": {
+      "value": 13200,
+      "type": "price",
+      "arranged": false,
+      "budget": false,
+      "currency": "UAH",
+      "negotiable": false,
+      "converted_value": null,
+      "previous_value": null,
+      "converted_previous_value": null,
+      "converted_currency": null,
+      "label": "13 200 грн.",
+      "previous_label": null
+     }
+    },
+    {
+     "key": "state",
+     "name": "Стан",
+     "type": "select",
+     "value": {
+      "key": "used",
+      "label": "Вживане"
+     }
+    },
+    {
+     "key": "console_manufacturers",
+     "name": "Тип приставки",
+     "type": "select",
+     "value": {
+      "key": "2270",
+      "label": "Nintendo DS"
+     }
+    },
+    {
+     "key": "for_gaming",
+     "name": "Підійде геймерам",
+     "type": "checkbox",
+     "value": {
+      "key": "1",
+      "label": "Підійде геймерам"
+     }
+    }
+   ],
+   "key_params": [],
+   "business": true,
+   "user": {
+    "id": 1003,
+    "created": "2014-03-31T13:49:19+03:00",
+    "other_ads_enabled": true,
+    "name": "Продавець 3",
+    "logo": null,
+    "logo_ad_page": null,
+    "social_network_account_type": "facebook",
+    "photo": null,
+    "banner_mobile": null,
+    "banner_desktop": null,
+    "company_name": "",
+    "about": "",
+    "b2c_business_page": false,
+    "is_online": false,
+    "last_seen": "2026-08-09T14:07:59+03:00",
+    "seller_type": null,
+    "uuid": "00000000-0000-4000-8000-000000000003"
+   },
+   "status": "active",
+   "contact": {
+    "name": "Продавець 3",
+    "phone": true,
+    "chat": true,
+    "negotiation": false,
+    "courier": true
+   },
+   "map": {
+    "zoom": 13,
+    "lat": 46.467,
+    "lon": 30.745,
+    "radius": 1,
+    "show_detailed": false
+   },
+   "location": {
+    "city": {
+     "id": 62,
+     "name": "Одеса",
+     "normalized_name": "odessa"
+    },
+    "district": {
+     "id": 89,
+     "name": "Приморський"
+    },
+    "region": {
+     "id": 9,
+     "name": "Одеська область",
+     "normalized_name": "od"
+    }
+   },
+   "photos": [
+    {
+     "id": 4988536072,
+     "filename": "fme34jzawog92-UA",
+     "rotation": 0,
+     "width": 1024,
+     "height": 768,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/fme34jzawog92-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4988536073,
+     "filename": "4cssgu1uh9a72-UA",
+     "rotation": 0,
+     "width": 1024,
+     "height": 768,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/4cssgu1uh9a72-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4988536074,
+     "filename": "e9t9deqx14hc3-UA",
+     "rotation": 0,
+     "width": 1024,
+     "height": 768,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/e9t9deqx14hc3-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4988536075,
+     "filename": "srf03027rh6q2-UA",
+     "rotation": 0,
+     "width": 1024,
+     "height": 768,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/srf03027rh6q2-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4988536076,
+     "filename": "8gjmwrxg4vsi1-UA",
+     "rotation": 0,
+     "width": 1024,
+     "height": 768,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/8gjmwrxg4vsi1-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4988536077,
+     "filename": "r5dxl203k5p51-UA",
+     "rotation": 0,
+     "width": 1024,
+     "height": 768,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/r5dxl203k5p51-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4988536078,
+     "filename": "vr19t74e5qj51-UA",
+     "rotation": 0,
+     "width": 1024,
+     "height": 768,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/vr19t74e5qj51-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4988536079,
+     "filename": "fqxzb5hnq7k9-UA",
+     "rotation": 0,
+     "width": 1024,
+     "height": 768,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/fqxzb5hnq7k9-UA/image;s={width}x{height}"
+    }
+   ],
+   "partner": null,
+   "category": {
+    "id": 101,
+    "type": "electronics"
+   },
+   "delivery": {
+    "rock": {
+     "offer_id": null,
+     "active": false,
+     "mode": null
+    }
+   },
+   "safedeal": {
+    "weight": 1,
+    "weight_grams": 500,
+    "status": "active",
+    "safedeal_blocked": false,
+    "allowed_quantity": []
+   },
+   "shop": {
+    "subdomain": null
+   },
+   "isGpsrAvailable": false,
+   "offer_type": "offer",
+   "protect_phone": false
+  },
+  {
+   "id": 927719339,
+   "url": "https://www.olx.ua/d/uk/obyavlenie/new-nintendo-3ds-xl-monster-hunter-edition-ID10MCb9.html",
+   "title": "New nintendo 3ds xl Monster Hunter edition",
+   "last_refresh_time": "2026-08-06T08:49:53+03:00",
+   "created_time": "2026-07-01T12:03:25+03:00",
+   "valid_to_time": "2026-09-05T08:49:52+03:00",
+   "pushup_time": null,
+   "description": "Консоль в стані близькому до ідеалу ( кілька незамітних потертостей), верхній екран IPS, нижній TN, на обох встановлені захисні плівки. Повний комплект.",
+   "promotion": {
+    "highlighted": false,
+    "urgent": false,
+    "top_ad": false,
+    "options": [],
+    "b2c_ad_page": false,
+    "premium_ad_page": false
+   },
+   "params": [
+    {
+     "key": "price",
+     "name": "Ціна за 1 шт.",
+     "type": "price",
+     "value": {
+      "value": 20000,
+      "type": "price",
+      "arranged": false,
+      "budget": false,
+      "currency": "UAH",
+      "negotiable": false,
+      "converted_value": null,
+      "previous_value": null,
+      "converted_previous_value": null,
+      "converted_currency": null,
+      "label": "20 000 грн.",
+      "previous_label": null
+     }
+    },
+    {
+     "key": "state",
+     "name": "Стан",
+     "type": "select",
+     "value": {
+      "key": "used",
+      "label": "Вживане"
+     }
+    },
+    {
+     "key": "console_manufacturers",
+     "name": "Тип приставки",
+     "type": "select",
+     "value": {
+      "key": "2270",
+      "label": "Nintendo DS"
+     }
+    },
+    {
+     "key": "for_gaming",
+     "name": "Підійде геймерам",
+     "type": "checkbox",
+     "value": {
+      "key": "1",
+      "label": "Підійде геймерам"
+     }
+    }
+   ],
+   "key_params": [],
+   "business": false,
+   "user": {
+    "id": 1004,
+    "created": "2014-08-31T02:05:49+03:00",
+    "other_ads_enabled": true,
+    "name": "Продавець 4",
+    "logo": null,
+    "logo_ad_page": null,
+    "social_network_account_type": null,
+    "photo": null,
+    "banner_mobile": null,
+    "banner_desktop": null,
+    "company_name": "",
+    "about": "",
+    "b2c_business_page": false,
+    "is_online": false,
+    "last_seen": "2026-07-21T12:37:15+03:00",
+    "seller_type": null,
+    "uuid": "00000000-0000-4000-8000-000000000004"
+   },
+   "status": "active",
+   "contact": {
+    "name": "Продавець 4",
+    "phone": false,
+    "chat": true,
+    "negotiation": false,
+    "courier": true
+   },
+   "map": {
+    "zoom": 12,
+    "lat": 48.91819,
+    "lon": 24.71343,
+    "radius": 2,
+    "show_detailed": false
+   },
+   "location": {
+    "city": {
+     "id": 132,
+     "name": "Івано-Франківськ",
+     "normalized_name": "ivano-frankovsk"
+    },
+    "region": {
+     "id": 13,
+     "name": "Івано-Франківська область",
+     "normalized_name": "if"
+    }
+   },
+   "photos": [
+    {
+     "id": 4814552921,
+     "filename": "6ghwsz3je7t92-UA",
+     "rotation": 0,
+     "width": 750,
+     "height": 1000,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/6ghwsz3je7t92-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4814552923,
+     "filename": "jkim3bh04nd12-UA",
+     "rotation": 0,
+     "width": 750,
+     "height": 1000,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/jkim3bh04nd12-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4814552924,
+     "filename": "rw63k3b7ad651-UA",
+     "rotation": 0,
+     "width": 750,
+     "height": 1000,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/rw63k3b7ad651-UA/image;s={width}x{height}"
+    }
+   ],
+   "partner": null,
+   "category": {
+    "id": 101,
+    "type": "electronics"
+   },
+   "delivery": {
+    "rock": {
+     "offer_id": null,
+     "active": false,
+     "mode": null
+    }
+   },
+   "safedeal": {
+    "weight": 2,
+    "weight_grams": 2000,
+    "status": "active",
+    "safedeal_blocked": false,
+    "allowed_quantity": []
+   },
+   "shop": {
+    "subdomain": null
+   },
+   "isGpsrAvailable": false,
+   "offer_type": "offer",
+   "protect_phone": true
+  },
+  {
+   "id": 930983200,
+   "url": "https://www.olx.ua/d/uk/obyavlenie/new-nintendo-3ds-xl-samus-edition-novyy-ID110jg4.html",
+   "title": "New Nintendo 3DS XL Samus Edition - Новый",
+   "last_refresh_time": "2026-08-05T22:11:58+03:00",
+   "created_time": "2026-08-05T22:09:42+03:00",
+   "valid_to_time": "2026-09-04T22:09:42+03:00",
+   "pushup_time": null,
+   "description": "Нове візуальне оформлення. Ніколи не використовувалася. Європейська версія. Samus Edition. Мод > грати безкоштовно в будь-яку гру. Telegram / whatsapp",
+   "promotion": {
+    "highlighted": false,
+    "urgent": false,
+    "top_ad": false,
+    "options": [],
+    "b2c_ad_page": false,
+    "premium_ad_page": false
+   },
+   "params": [
+    {
+     "key": "price",
+     "name": "Ціна за 1 шт.",
+     "type": "price",
+     "value": {
+      "value": 25899,
+      "type": "price",
+      "arranged": false,
+      "budget": false,
+      "currency": "UAH",
+      "negotiable": false,
+      "converted_value": null,
+      "previous_value": null,
+      "converted_previous_value": null,
+      "converted_currency": null,
+      "label": "25 899 грн.",
+      "previous_label": null
+     }
+    },
+    {
+     "key": "state",
+     "name": "Стан",
+     "type": "select",
+     "value": {
+      "key": "new",
+      "label": "Нове"
+     }
+    },
+    {
+     "key": "console_manufacturers",
+     "name": "Тип приставки",
+     "type": "select",
+     "value": {
+      "key": "2275",
+      "label": "Інша"
+     }
+    },
+    {
+     "key": "for_gaming",
+     "name": "Підійде геймерам",
+     "type": "checkbox",
+     "value": {
+      "key": "1",
+      "label": "Підійде геймерам"
+     }
+    }
+   ],
+   "key_params": [],
+   "business": false,
+   "user": {
+    "id": 1005,
+    "created": "2026-08-02T17:14:29+03:00",
+    "other_ads_enabled": true,
+    "name": "Продавець 5",
+    "logo": null,
+    "logo_ad_page": null,
+    "social_network_account_type": null,
+    "photo": null,
+    "banner_mobile": null,
+    "banner_desktop": null,
+    "company_name": "",
+    "about": "",
+    "b2c_business_page": false,
+    "is_online": false,
+    "last_seen": "2026-08-05T22:09:42+03:00",
+    "seller_type": null,
+    "uuid": "00000000-0000-4000-8000-000000000005"
+   },
+   "status": "active",
+   "contact": {
+    "name": "Продавець 5",
+    "phone": false,
+    "chat": true,
+    "negotiation": false,
+    "courier": true
+   },
+   "map": {
+    "zoom": 12,
+    "lat": 46.38471,
+    "lon": 30.70913,
+    "radius": 6,
+    "show_detailed": false
+   },
+   "location": {
+    "city": {
+     "id": 62,
+     "name": "Одеса",
+     "normalized_name": "odessa"
+    },
+    "district": {
+     "id": 85,
+     "name": "Київський"
+    },
+    "region": {
+     "id": 9,
+     "name": "Одеська область",
+     "normalized_name": "od"
+    }
+   },
+   "photos": [
+    {
+     "id": 4976861515,
+     "filename": "m5tb1q88mrcm2-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 960,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/m5tb1q88mrcm2-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4976861516,
+     "filename": "zgwhfzm6myid1-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 960,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/zgwhfzm6myid1-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4976861517,
+     "filename": "vxufxujpar3e2-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 960,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/vxufxujpar3e2-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4976861518,
+     "filename": "atbyrtzl5thj3-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 960,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/atbyrtzl5thj3-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4976861519,
+     "filename": "nc2qxgddijqa3-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 960,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/nc2qxgddijqa3-UA/image;s={width}x{height}"
+    }
+   ],
+   "partner": null,
+   "category": {
+    "id": 101,
+    "type": "electronics"
+   },
+   "delivery": {
+    "rock": {
+     "offer_id": null,
+     "active": false,
+     "mode": null
+    }
+   },
+   "safedeal": {
+    "weight": 10,
+    "weight_grams": 10000,
+    "status": "active",
+    "safedeal_blocked": false,
+    "allowed_quantity": []
+   },
+   "shop": {
+    "subdomain": null
+   },
+   "isGpsrAvailable": false,
+   "offer_type": "offer",
+   "protect_phone": true
+  },
+  {
+   "id": 872594855,
+   "url": "https://www.olx.ua/d/uk/obyavlenie/chehol-dlya-nintendo-3ds-xl-ll-protivoudarnyy-new-3ds-xl-game-boy-advans-IDX3jMz.html",
+   "title": "Чехол для Nintendo 3DS XL LL Противоударный NEW 3DS XL Game Boy Advans",
+   "last_refresh_time": "2026-08-05T12:38:20+03:00",
+   "created_time": "2024-12-30T13:05:53+02:00",
+   "valid_to_time": "2026-09-04T12:38:18+03:00",
+   "pushup_time": null,
+   "description": "Якщо Вам цікаво подивитись відгуки по цьому та інших безліч товарів повязаних<br />\nз геймінгом\\консолями та акксесуарами, будь ласка звертайтесь cюди до чату або до нашої  інсти:<br />\n<br />\ncollection._.place<br />\n<br />\nПо питанням звертайтесь до чату<br />\n<br />\nТак же есть в наличии Множество других акксесуаров для всех ревизий Nintendo Switch и Lite Версии. Так-же есть и другие. <br />\nОтправка по ОЛХ-Доставке Новая Почта или по мин. Предоплате (185 грн.) наложенного платежа так же Новая Почта.",
+   "promotion": {
+    "highlighted": false,
+    "urgent": false,
+    "top_ad": false,
+    "options": [],
+    "b2c_ad_page": false,
+    "premium_ad_page": false
+   },
+   "params": [
+    {
+     "key": "price",
+     "name": "Ціна за 1 шт.",
+     "type": "price",
+     "value": {
+      "value": 389,
+      "type": "price",
+      "arranged": false,
+      "budget": false,
+      "currency": "UAH",
+      "negotiable": false,
+      "converted_value": null,
+      "previous_value": null,
+      "converted_previous_value": null,
+      "converted_currency": null,
+      "label": "389 грн.",
+      "previous_label": null
+     }
+    },
+    {
+     "key": "state",
+     "name": "Стан",
+     "type": "select",
+     "value": {
+      "key": "new",
+      "label": "Нове"
+     }
+    },
+    {
+     "key": "console_manufacturers",
+     "name": "Тип приставки",
+     "type": "select",
+     "value": {
+      "key": "2275",
+      "label": "Інша"
+     }
+    }
+   ],
+   "key_params": [],
+   "business": true,
+   "user": {
+    "id": 1006,
+    "created": "2020-07-22T14:29:41+03:00",
+    "other_ads_enabled": true,
+    "name": "Продавець 6",
+    "logo": null,
+    "logo_ad_page": null,
+    "social_network_account_type": null,
+    "photo": null,
+    "banner_mobile": null,
+    "banner_desktop": null,
+    "company_name": "",
+    "about": "",
+    "b2c_business_page": false,
+    "is_online": false,
+    "last_seen": "2026-08-02T12:50:45+03:00",
+    "seller_type": null,
+    "uuid": "00000000-0000-4000-8000-000000000006"
+   },
+   "status": "active",
+   "contact": {
+    "name": "Продавець 6",
+    "phone": true,
+    "chat": true,
+    "negotiation": false,
+    "courier": true
+   },
+   "map": {
+    "zoom": 12,
+    "lat": 50.51015,
+    "lon": 30.50243,
+    "radius": 2,
+    "show_detailed": false
+   },
+   "location": {
+    "city": {
+     "id": 268,
+     "name": "Київ",
+     "normalized_name": "kiev"
+    },
+    "district": {
+     "id": 9,
+     "name": "Оболонський"
+    },
+    "region": {
+     "id": 25,
+     "name": "Київська область",
+     "normalized_name": "ko"
+    }
+   },
+   "photos": [
+    {
+     "id": 4002802195,
+     "filename": "v5ylnl7npfvb2-UA",
+     "rotation": 0,
+     "width": 591,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/v5ylnl7npfvb2-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4002802196,
+     "filename": "agtfp23jfe5f2-UA",
+     "rotation": 0,
+     "width": 591,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/agtfp23jfe5f2-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4002802198,
+     "filename": "fn2n10konelq-UA",
+     "rotation": 0,
+     "width": 591,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/fn2n10konelq-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4002802199,
+     "filename": "mmz191ztyf6d-UA",
+     "rotation": 0,
+     "width": 705,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/mmz191ztyf6d-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4002802200,
+     "filename": "8x7kpgym8ncu1-UA",
+     "rotation": 0,
+     "width": 591,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/8x7kpgym8ncu1-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4002802201,
+     "filename": "9nwewancegx9-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/9nwewancegx9-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4002802202,
+     "filename": "6jhk71msqe7p1-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/6jhk71msqe7p1-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4049821737,
+     "filename": "bumhit302ivz1-UA",
+     "rotation": 0,
+     "width": 1080,
+     "height": 1920,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/bumhit302ivz1-UA/image;s={width}x{height}"
+    }
+   ],
+   "partner": null,
+   "category": {
+    "id": 101,
+    "type": "electronics"
+   },
+   "delivery": {
+    "rock": {
+     "offer_id": null,
+     "active": false,
+     "mode": null
+    }
+   },
+   "safedeal": {
+    "weight": 1,
+    "weight_grams": 500,
+    "status": "active",
+    "safedeal_blocked": false,
+    "allowed_quantity": []
+   },
+   "shop": {
+    "subdomain": null
+   },
+   "isGpsrAvailable": false,
+   "offer_type": "offer",
+   "protect_phone": false
+  },
+  {
+   "id": 915417659,
+   "url": "https://www.olx.ua/d/uk/obyavlenie/new-nintendo-3ds-zmnn-panel-IDZVZVX.html",
+   "title": "New Nintendo 3ds змінні панелі",
+   "last_refresh_time": "2026-07-25T21:34:41+03:00",
+   "created_time": "2026-02-25T08:41:26+02:00",
+   "valid_to_time": "2026-08-24T21:34:41+03:00",
+   "pushup_time": null,
+   "description": "New Nintendo 3Ds змінні панелі Luidgi, гарний стан, цілі кріплення, болти на місці. Консоль на фото для прикладу.",
+   "promotion": {
+    "highlighted": false,
+    "urgent": false,
+    "top_ad": false,
+    "options": [],
+    "b2c_ad_page": false,
+    "premium_ad_page": false
+   },
+   "params": [
+    {
+     "key": "price",
+     "name": "Ціна за 1 шт.",
+     "type": "price",
+     "value": {
+      "value": 1347,
+      "type": "price",
+      "arranged": false,
+      "budget": false,
+      "currency": "UAH",
+      "negotiable": false,
+      "converted_value": null,
+      "previous_value": null,
+      "converted_previous_value": null,
+      "converted_currency": null,
+      "label": "1 347 грн.",
+      "previous_label": null
+     }
+    },
+    {
+     "key": "state",
+     "name": "Стан",
+     "type": "select",
+     "value": {
+      "key": "used",
+      "label": "Вживане"
+     }
+    },
+    {
+     "key": "console_manufacturers",
+     "name": "Тип приставки",
+     "type": "select",
+     "value": {
+      "key": "2270",
+      "label": "Nintendo DS"
+     }
+    },
+    {
+     "key": "for_gaming",
+     "name": "Підійде геймерам",
+     "type": "checkbox",
+     "value": {
+      "key": "1",
+      "label": "Підійде геймерам"
+     }
+    }
+   ],
+   "key_params": [],
+   "business": true,
+   "user": {
+    "id": 1007,
+    "created": "2015-08-12T08:43:49+03:00",
+    "other_ads_enabled": true,
+    "name": "Продавець 7",
+    "logo": null,
+    "logo_ad_page": null,
+    "social_network_account_type": null,
+    "photo": null,
+    "banner_mobile": null,
+    "banner_desktop": null,
+    "company_name": "",
+    "about": "",
+    "b2c_business_page": false,
+    "is_online": false,
+    "last_seen": "2026-07-29T21:31:58+03:00",
+    "seller_type": null,
+    "uuid": "00000000-0000-4000-8000-000000000007"
+   },
+   "status": "active",
+   "contact": {
+    "name": "Продавець 7",
+    "phone": true,
+    "chat": true,
+    "negotiation": false,
+    "courier": true
+   },
+   "map": {
+    "zoom": 13,
+    "lat": 48.463,
+    "lon": 35.02387,
+    "radius": 2,
+    "show_detailed": false
+   },
+   "location": {
+    "city": {
+     "id": 121,
+     "name": "Дніпро",
+     "normalized_name": "dnepr"
+    },
+    "district": {
+     "id": 119,
+     "name": "Центральний"
+    },
+    "region": {
+     "id": 21,
+     "name": "Дніпропетровська область",
+     "normalized_name": "dnp"
+    }
+   },
+   "photos": [
+    {
+     "id": 4409803493,
+     "filename": "1wpasc36prth1-UA",
+     "rotation": 0,
+     "width": 768,
+     "height": 1020,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/1wpasc36prth1-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4409803494,
+     "filename": "pvvpla1w2a0c1-UA",
+     "rotation": 0,
+     "width": 1175,
+     "height": 1986,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/pvvpla1w2a0c1-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4409803495,
+     "filename": "g564am46ditj2-UA",
+     "rotation": 0,
+     "width": 1233,
+     "height": 1795,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/g564am46ditj2-UA/image;s={width}x{height}"
+    }
+   ],
+   "partner": null,
+   "category": {
+    "id": 101,
+    "type": "electronics"
+   },
+   "delivery": {
+    "rock": {
+     "offer_id": null,
+     "active": false,
+     "mode": null
+    }
+   },
+   "safedeal": {
+    "weight": 10,
+    "weight_grams": 10000,
+    "status": "active",
+    "safedeal_blocked": false,
+    "allowed_quantity": []
+   },
+   "shop": {
+    "subdomain": null
+   },
+   "isGpsrAvailable": false,
+   "offer_type": "offer",
+   "protect_phone": false
+  },
+  {
+   "id": 929114304,
+   "url": "https://www.olx.ua/d/uk/obyavlenie/portativna-grova-pristavka-konsol-nintendo-new-3ds-xl-blue-32-gb-ID10St4A.html",
+   "title": "Портативна ігрова приставка консоль Nintendo New 3DS XL Blue 32 gb",
+   "last_refresh_time": "2026-07-16T13:49:12+03:00",
+   "created_time": "2026-07-16T13:46:22+03:00",
+   "valid_to_time": "2026-08-15T13:46:23+03:00",
+   "pushup_time": null,
+   "description": "Ігрова консоль Nintendo New 3DS XL у синьому кольорі. Екрани з першого дня використання під захисними плівками, консоль повністю справна і працює.<br />\n<br />\nКомплектація:<br />\n• Шнур живлення<br />\n• Карта пам'яті 32 ГБ, вже заповнена іграми та додатками<br />\n• Стилус відсутній<br />\n• Встановлений новий китайський акумулятор<br />\n<br />\nНюанси стану:<br />\n• Є нюанс на нижньому екрані (не зрозуміло, чи проблема в самому екрані, чи в шлейфі)<br />\n• Невеликий засвіт на верхньому екрані зліва<br />\n<br />\nВізуально консоль у нормальному стані, всі функції працюють відмінно.<br />\n<br />\nЦіна вказана для накладеного платежу, також можливий продаж за криптовалюту, usdt, binance.",
+   "promotion": {
+    "highlighted": false,
+    "urgent": false,
+    "top_ad": false,
+    "options": [],
+    "b2c_ad_page": false,
+    "premium_ad_page": false
+   },
+   "params": [
+    {
+     "key": "price",
+     "name": "Ціна за 1 шт.",
+     "type": "price",
+     "value": {
+      "value": 8000,
+      "type": "price",
+      "arranged": false,
+      "budget": false,
+      "currency": "UAH",
+      "negotiable": false,
+      "converted_value": null,
+      "previous_value": null,
+      "converted_previous_value": null,
+      "converted_currency": null,
+      "label": "8 000 грн.",
+      "previous_label": null
+     }
+    },
+    {
+     "key": "state",
+     "name": "Стан",
+     "type": "select",
+     "value": {
+      "key": "used",
+      "label": "Вживане"
+     }
+    },
+    {
+     "key": "console_manufacturers",
+     "name": "Тип приставки",
+     "type": "select",
+     "value": {
+      "key": "2270",
+      "label": "Nintendo DS"
+     }
+    },
+    {
+     "key": "for_gaming",
+     "name": "Підійде геймерам",
+     "type": "checkbox",
+     "value": {
+      "key": "1",
+      "label": "Підійде геймерам"
+     }
+    }
+   ],
+   "key_params": [],
+   "business": true,
+   "user": {
+    "id": 1008,
+    "created": "2017-11-21T09:13:26+02:00",
+    "other_ads_enabled": true,
+    "name": "Продавець 8",
+    "logo": null,
+    "logo_ad_page": null,
+    "social_network_account_type": null,
+    "photo": null,
+    "banner_mobile": null,
+    "banner_desktop": null,
+    "company_name": "Магазин 8",
+    "about": "Некомерційний продаж, розпродаж власної колекції ігрових консолей та ігор до них.\r\nNintendo, Sony, Xbox.",
+    "b2c_business_page": false,
+    "is_online": false,
+    "last_seen": "2026-08-03T23:33:01+03:00",
+    "seller_type": null,
+    "uuid": "00000000-0000-4000-8000-000000000008"
+   },
+   "status": "active",
+   "contact": {
+    "name": "Продавець 8",
+    "phone": true,
+    "chat": true,
+    "negotiation": false,
+    "courier": true
+   },
+   "map": {
+    "zoom": 12,
+    "lat": 49.5448,
+    "lon": 30.87206,
+    "radius": 3,
+    "show_detailed": false
+   },
+   "location": {
+    "city": {
+     "id": 30867,
+     "name": "Богуслав",
+     "normalized_name": "boguslav_30867"
+    },
+    "region": {
+     "id": 25,
+     "name": "Київська область",
+     "normalized_name": "ko"
+    }
+   },
+   "photos": [
+    {
+     "id": 4958953716,
+     "filename": "lfmfed1fsvh61-UA",
+     "rotation": 0,
+     "width": 885,
+     "height": 1000,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/lfmfed1fsvh61-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4958953717,
+     "filename": "2wporhk7l7dz-UA",
+     "rotation": 0,
+     "width": 890,
+     "height": 1000,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/2wporhk7l7dz-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4958953718,
+     "filename": "wpi8fs4y3dth1-UA",
+     "rotation": 0,
+     "width": 750,
+     "height": 1000,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/wpi8fs4y3dth1-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4958953719,
+     "filename": "5071khsygrtv1-UA",
+     "rotation": 0,
+     "width": 846,
+     "height": 1000,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/5071khsygrtv1-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4958953720,
+     "filename": "h2pah25hlzsr2-UA",
+     "rotation": 0,
+     "width": 1000,
+     "height": 718,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/h2pah25hlzsr2-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4958953721,
+     "filename": "i2k9b2gprc6w1-UA",
+     "rotation": 0,
+     "width": 1000,
+     "height": 739,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/i2k9b2gprc6w1-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4958953722,
+     "filename": "2l7sv4uilm3w3-UA",
+     "rotation": 0,
+     "width": 1000,
+     "height": 836,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/2l7sv4uilm3w3-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4958953723,
+     "filename": "dvhcdr6rlnon1-UA",
+     "rotation": 0,
+     "width": 1000,
+     "height": 769,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/dvhcdr6rlnon1-UA/image;s={width}x{height}"
+    }
+   ],
+   "partner": null,
+   "category": {
+    "id": 101,
+    "type": "electronics"
+   },
+   "delivery": {
+    "rock": {
+     "offer_id": null,
+     "active": false,
+     "mode": null
+    }
+   },
+   "safedeal": {
+    "weight": 2,
+    "weight_grams": 2000,
+    "status": "active",
+    "safedeal_blocked": false,
+    "allowed_quantity": []
+   },
+   "shop": {
+    "subdomain": "AtC"
+   },
+   "isGpsrAvailable": false,
+   "offer_type": "offer",
+   "protect_phone": false
+  },
+  {
+   "id": 923465785,
+   "url": "https://www.olx.ua/d/uk/obyavlenie/nintendo-new-3ds-xl-velichezniy-vibr-ID10uLDr.html",
+   "title": "Nintendo New 3DS XL Величезний вибір!",
+   "last_refresh_time": "2026-07-12T12:43:24+03:00",
+   "created_time": "2026-05-15T14:27:00+03:00",
+   "valid_to_time": "2026-08-13T14:27:00+03:00",
+   "pushup_time": null,
+   "description": "Шукаєте ідеальну портативну консоль від Nintendo? В наявності топова модель лінійки — New Nintendo 3DS XL / LL у стильному  синьому кольорі (blue)!<br />\n<br />\nАКТУАЛЬНИЙ КАТАЛОГ ТА ЦІНИ ТУТ:<br />\n> https://t.me/ConsoleLab<br />\n<br />\nУвага! Ціна в оголошенні вказана за базову модель New Nintendo 3DS XL/LL White. Оскільки комплектація (об'єм карти пам'яті) та асортимент постійно оновлюються, актуальні позиції та ціни дивіться в нашому Telegram-каналі.<br />\n<br />\nЧОМУ ВАРТО ОБРАТИ НАС?<br />\n<br />\n• Повне налаштування: Консолі повністю підготовлені (меню та ігри англійською/українською/рос мовами). Встановлено найкращий софт, все готово до використання прямо з коробки. • Повна перевірка: Кожна приставка проходить ретельний тест усіх кнопок, стіків (включаючи C-Stick), сенсорного екрана, 3D-режиму, шарніра та акумулятора. <br />\n<br />\n• Стан на вибір: Від чудових \"робочих конячок\" до ідеальних колекційних екземплярів у збереженому білому кольорі.<br />\n<br />\nЩО ВИ ОТРИМУЄТЕ (базовий комплект):<br />\n<br />\n• Консоль New Nintendo 3DS XL / LL (White)<br />\n• Карта пам'яті (від 32ГБ до 128ГБ/256ГБ — на ваш вибір)<br />\n• Зарядний кабель або Блок живлення<br />\n• Стилус <br />\n• Встановлені топові ігри (Zelda, Mario, Animal Crossing, Resident Evil, Monster Hunter та інші)",
+   "promotion": {
+    "highlighted": false,
+    "urgent": false,
+    "top_ad": false,
+    "options": [],
+    "b2c_ad_page": false,
+    "premium_ad_page": false
+   },
+   "params": [
+    {
+     "key": "price",
+     "name": "Ціна за 1 шт.",
+     "type": "price",
+     "value": {
+      "value": 8000,
+      "type": "price",
+      "arranged": false,
+      "budget": false,
+      "currency": "UAH",
+      "negotiable": false,
+      "converted_value": null,
+      "previous_value": null,
+      "converted_previous_value": null,
+      "converted_currency": null,
+      "label": "8 000 грн.",
+      "previous_label": null
+     }
+    },
+    {
+     "key": "state",
+     "name": "Стан",
+     "type": "select",
+     "value": {
+      "key": "used",
+      "label": "Вживане"
+     }
+    },
+    {
+     "key": "console_manufacturers",
+     "name": "Тип приставки",
+     "type": "select",
+     "value": {
+      "key": "2275",
+      "label": "Інша"
+     }
+    }
+   ],
+   "key_params": [],
+   "business": true,
+   "user": {
+    "id": 1009,
+    "created": "2025-07-18T15:30:45+03:00",
+    "other_ads_enabled": true,
+    "name": "Продавець 9",
+    "logo": null,
+    "logo_ad_page": null,
+    "social_network_account_type": null,
+    "photo": null,
+    "banner_mobile": null,
+    "banner_desktop": null,
+    "company_name": "",
+    "about": "",
+    "b2c_business_page": false,
+    "is_online": false,
+    "last_seen": "2026-08-08T18:15:30+03:00",
+    "seller_type": null,
+    "uuid": "00000000-0000-4000-8000-000000000009"
+   },
+   "status": "active",
+   "contact": {
+    "name": "Продавець 9",
+    "phone": true,
+    "chat": true,
+    "negotiation": false,
+    "courier": true
+   },
+   "map": {
+    "zoom": 12,
+    "lat": 47.8659,
+    "lon": 30.59055,
+    "radius": 1,
+    "show_detailed": false
+   },
+   "location": {
+    "city": {
+     "id": 469,
+     "name": "Врадіївка",
+     "normalized_name": "vradievka"
+    },
+    "region": {
+     "id": 19,
+     "name": "Миколаївська область",
+     "normalized_name": "nik"
+    }
+   },
+   "photos": [
+    {
+     "id": 4654345102,
+     "filename": "vnaf2ulgiyd11-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/vnaf2ulgiyd11-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4654345103,
+     "filename": "92ubeyvf1ih71-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/92ubeyvf1ih71-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4654345104,
+     "filename": "v1yh563gqrck3-UA",
+     "rotation": 0,
+     "width": 1280,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/v1yh563gqrck3-UA/image;s={width}x{height}"
+    },
+    {
+     "id": 4654345105,
+     "filename": "6ka3ix2wehg93-UA",
+     "rotation": 0,
+     "width": 1277,
+     "height": 1280,
+     "link": "https://ireland.apollo.olxcdn.com:443/v1/files/6ka3ix2wehg93-UA/image;s={width}x{height}"
+    }
+   ],
+   "partner": null,
+   "category": {
+    "id": 101,
+    "type": "electronics"
+   },
+   "delivery": {
+    "rock": {
+     "offer_id": null,
+     "active": false,
+     "mode": null
+    }
+   },
+   "safedeal": {
+    "weight": 10,
+    "weight_grams": 10000,
+    "status": "active",
+    "safedeal_blocked": false,
+    "allowed_quantity": []
+   },
+   "shop": {
+    "subdomain": null
+   },
+   "isGpsrAvailable": false,
+   "offer_type": "offer",
+   "protect_phone": false
+  }
+ ],
+ "metadata": {
+  "total_elements": 9,
+  "visible_total_count": 9,
+  "promoted": [
+   0,
+   1
+  ],
+  "search_suggestion": {
+   "type": "extended_s2v",
+   "url": "https://www.olx.ua/api/v1/offers?offset=0&limit=40&query=new+nintendo+3ds&category_id=101&currency=UAH&sort_by=created_at%3Adesc&strategy=s2v",
+   "changes": {
+    "strategy": "s2v"
+   }
+  },
+  "source": {
+   "promoted": [
+    0,
+    1
+   ],
+   "organic": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ]
+  }
+ },
+ "links": {
+  "self": {
+   "href": "https://www.olx.ua/api/v1/offers?offset=0&limit=40&query=new+nintendo+3ds&category_id=101&currency=UAH&sort_by=created_at%3Adesc"
+  },
+  "first": {
+   "href": "https://www.olx.ua/api/v1/offers?offset=0&limit=40&query=new+nintendo+3ds&category_id=101&currency=UAH&sort_by=created_at%3Adesc"
+  }
+ }
+}

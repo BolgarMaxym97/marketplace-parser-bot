@@ -1,0 +1,83 @@
+export interface Env {
+  DB: D1Database;
+
+  // Secrets
+  BOT_TOKEN: string;
+  WEBHOOK_SECRET: string;
+  /** One chat id, or several separated by commas: "123,456". */
+  OWNER_CHAT_ID: string;
+
+  // Vars
+  MAX_SOURCES_PER_TICK?: string;
+  MAX_SENDS_PER_TICK?: string;
+  SUBREQUEST_BUDGET?: string;
+  PHOTO_SIZE?: string;
+  TIMEZONE?: string;
+  RETENTION_PER_SOURCE?: string;
+  MAX_FAILURES?: string;
+}
+
+export interface Config {
+  maxSourcesPerTick: number;
+  maxSendsPerTick: number;
+  subrequestBudget: number;
+  photoSize: string;
+  timezone: string;
+  retentionPerSource: number;
+  maxFailures: number;
+  /** Everyone allowed to run commands. Reports go to all of them. */
+  ownerChatIds: number[];
+}
+
+/** Subrequests kept aside for owner reports and failure notices. */
+export const SUBREQUEST_RESERVE = 5;
+
+/** Telegram caps a media group at 10 items. */
+export const MAX_PHOTOS = 10;
+
+/** Telegram caps a media-group caption at 1024 characters. */
+export const MAX_CAPTION = 1024;
+
+/** Delay between Telegram sends. Wall-clock, so it does not count against the CPU limit. */
+export const SEND_DELAY_MS = 1100;
+
+export const FETCH_TIMEOUT_MS = 10_000;
+
+/** Sent to OLX so the request does not look like a naked script. */
+export const BROWSER_HEADERS: Record<string, string> = {
+  'user-agent':
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36',
+  'accept-language': 'uk,en;q=0.9',
+};
+
+function num(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+/** Accepts one id or several, separated by commas, spaces or newlines. */
+export function parseOwnerIds(raw: string | undefined): number[] {
+  const ids = (raw ?? '')
+    .split(/[\s,;]+/)
+    .filter((part) => part.length > 0)
+    .map(Number)
+    .filter((id) => Number.isSafeInteger(id) && id !== 0);
+
+  return [...new Set(ids)];
+}
+
+export const isOwner = (config: Config, chatId: number): boolean =>
+  config.ownerChatIds.includes(chatId);
+
+export function readConfig(env: Env): Config {
+  return {
+    maxSourcesPerTick: num(env.MAX_SOURCES_PER_TICK, 10),
+    maxSendsPerTick: num(env.MAX_SENDS_PER_TICK, 30),
+    subrequestBudget: num(env.SUBREQUEST_BUDGET, 50),
+    photoSize: env.PHOTO_SIZE || '1000x700',
+    timezone: env.TIMEZONE || 'Europe/Kyiv',
+    retentionPerSource: num(env.RETENTION_PER_SOURCE, 500),
+    maxFailures: num(env.MAX_FAILURES, 5),
+    ownerChatIds: parseOwnerIds(env.OWNER_CHAT_ID),
+  };
+}

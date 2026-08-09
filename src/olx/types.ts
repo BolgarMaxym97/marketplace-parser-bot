@@ -1,0 +1,32 @@
+/** Narrow view of an OLX offer — only what a Telegram message needs. */
+export interface OlxAd {
+  id: number;
+  title: string;
+  url: string;
+  /** Raw HTML as returned by OLX (contains <br />). */
+  description: string;
+  /** ISO 8601 with offset, e.g. 2026-08-09T15:00:00+03:00 */
+  createdTime: string;
+  priceLabel: string;
+  cityName: string | null;
+  /** Shortened, e.g. "Вінницька обл." */
+  regionName: string | null;
+  /** "Вживане" / "Нове", when the category defines it. */
+  condition: string | null;
+  sellerName: string | null;
+  photoUrls: string[];
+}
+
+/** The listing parameters embedded in the search page, mapped 1:1 to API query params. */
+export interface ListingParams {
+  query?: string;
+  category_id?: number;
+  currency?: string;
+  sort_by?: string;
+  [key: string]: string | number | boolean | undefined;
+}
+
+export interface ResolvedSource {
+  apiUrl: string;
+  label: string;
+}
