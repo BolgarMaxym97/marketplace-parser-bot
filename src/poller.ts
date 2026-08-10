@@ -1,6 +1,6 @@
 import { readConfig, SUBREQUEST_RESERVE, type Config, type Env } from './config';
 import { activeChats, type ChatRow } from './db/chats';
-import { filterUnseen, markSeen, markSeenBatch } from './db/seen';
+import { claimAd, filterUnseen, markSeenBatch, releaseAd } from './db/seen';
 import {
   advanceWatermark,
   markFailure,
@@ -113,7 +113,7 @@ async function processSource(
   const floor = Math.max(cutoff, source.last_created_at ?? 0);
   const recent = ads.filter((ad) => isRecent(ad, floor));
 
-  const unseen = await filterUnseen(deps.db, source.id, recent.map((ad) => ad.id));
+  const unseen = await filterUnseen(deps.db, recent.map((ad) => ad.id));
   const fresh = recent.filter((ad) => unseen.has(ad.id)).sort(oldestFirst);
 
   // Oldest first means every ad left in the loop is newer than the one just sent,
@@ -126,21 +126,25 @@ async function processSource(
     if (state.budget - chats.length < state.reserve) break;
     if (state.sends >= config.maxSendsPerTick) break;
 
+    // Claimed before the first send, not after the last: filterUnseen ran once
+    // for the whole source, and between that read and this send another source
+    // of this tick — or a concurrent invocation — can have taken the same ad.
+    // The claim is what makes two searches sharing an ad send it once.
+    if (!(await claimAd(deps.db, source.id, ad.id))) continue;
+
     const result = await broadcastAd(deps, chats, ad);
     state.budget -= result.spent;
     state.sends += result.spent;
 
+    // Nobody took it, so the claim is handed back and the next tick tries again.
+    // The claim outlives only a crash mid-broadcast, which costs the ad instead
+    // of duplicating it — the price of never sending the same ad twice.
+    if (result.delivered === 0) await releaseAd(deps.db, source.id, ad.id);
+    else delivered = Math.max(delivered, createdAt(ad));
+
     if (result.rateLimited) {
       state.rateLimited = true;
       break;
-    }
-
-    // Recorded only after the broadcast, and only if at least one chat took it.
-    // The reverse order would lose an ad forever on a mid-send crash; this way
-    // the worst case is a duplicate.
-    if (result.delivered > 0) {
-      await markSeen(deps.db, source.id, ad.id);
-      delivered = Math.max(delivered, createdAt(ad));
     }
   }
 

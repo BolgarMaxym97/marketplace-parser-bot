@@ -8,13 +8,13 @@ const DB = env.DB as D1Database;
 
 const API_URL = 'https://www.olx.ua/api/v1/offers?query=test&limit=50';
 
-async function seedSource(initialized: boolean): Promise<number> {
+async function seedSource(initialized: boolean, apiUrl: string = API_URL): Promise<number> {
   const row = await DB.prepare(
     `INSERT INTO sources (page_url, api_url, label, initialized, created_at)
      VALUES ('https://www.olx.ua/uk/q-test/', ?, 'test', ?, 0)
      RETURNING id`,
   )
-    .bind(API_URL, initialized ? 1 : 0)
+    .bind(apiUrl, initialized ? 1 : 0)
     .first<{ id: number }>();
   return row!.id;
 }
@@ -415,6 +415,40 @@ describe('deduplication', () => {
     vi.stubGlobal('fetch', second.fetch);
     await pollSources(testEnv());
     expect(mediaGroups(second.telegramCalls)).toBe(0);
+  });
+
+  it('sends an ad only once when two searches both match it', async () => {
+    const first = await seedSource(true);
+    const second = await seedSource(true, `${API_URL}&other=1`);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 300 }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    expect(stub.olxCalls).toHaveLength(2); // both searches did run
+    expect(mediaGroups(stub.telegramCalls)).toBe(1);
+
+    // Whichever search got there first owns the single row; the other records nothing.
+    const owners = [...(await seenIds(first)), ...(await seenIds(second))];
+    expect(owners).toEqual([300]);
+  });
+
+  it('skips an ad another search already claimed', async () => {
+    const sourceId = await seedSource(true);
+    await seedChats(-100);
+
+    // A row owned by a source that is not even polled here still blocks the send.
+    await DB.prepare('INSERT INTO seen_ads (source_id, ad_id, sent_at) VALUES (999, 310, 0)').run();
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 310 }, { id: 311 }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(1);
+    expect(await seenIds(sourceId)).toEqual([311]);
   });
 
   it('only sends the ad that is actually new', async () => {

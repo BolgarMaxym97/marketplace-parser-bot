@@ -3,7 +3,8 @@
 Cloudflare Worker that watches OLX search results and broadcasts new ads to every Telegram chat the bot is in.
 
 - Poll cron `*/5 * * * *`, retention cron `0 3 * * *`
-- Dedup key is OLX's own `ad.id` — a bumped ad is never re-sent
+- Dedup key is OLX's own `ad.id`, and it is global — a bumped ad is never re-sent, and an ad matched by
+  two overlapping searches goes out once, from whichever search claims it first
 - The first sweep of a new search is silent: everything found is recorded, only the owner gets a report
 
 ## How a search is resolved
@@ -91,14 +92,14 @@ wholesale, so include yourself if you want to stay.
 ## Tests
 
 ```bash
-npm test            # 81 tests, no network
+npm test            # 106 tests, no network
 npm run test:live   # hits olx.ua: resolve → API → render
 npm run typecheck
 ```
 
 `npm test` covers rendering against a captured `/api/v1/offers` response, the page-state resolver,
-deduplication, silent initialisation, subrequest-budget exhaustion, Telegram `429`, a kicked chat,
-forum-topic routing, webhook auth and access control, and history retention.
+deduplication across searches, claim contention, silent initialisation, subrequest-budget exhaustion,
+Telegram `429`, a kicked chat, forum-topic routing, webhook auth and access control, and history retention.
 
 The fixture in `test/fixtures/offers.json` is a real OLX response with seller identities pseudonymised.
 
@@ -113,5 +114,9 @@ curl "http://localhost:8787/__scheduled?cron=*/5+*+*+*+*"
 
 Cloudflare Workers Free allows 50 subrequests per invocation. A tick spends one per search plus one per
 `(ad × chat)` send, and stops before it would start a broadcast it cannot finish — undelivered ads stay
-unrecorded and go out on the next tick. `seen_ads` is only written **after** a successful send, so a crash
-mid-broadcast costs a duplicate rather than a lost ad.
+unrecorded and go out on the next tick.
+
+An ad is **claimed** in `seen_ads` before the first send and released again if no chat took it. The claim is
+one SQL statement, so two overlapping ticks — or two searches matching the same ad — cannot both pass it,
+which is what keeps the same listing from arriving twice within the same second. The cost is the opposite
+failure mode: a crash between the claim and the last send loses that ad instead of duplicating it.
