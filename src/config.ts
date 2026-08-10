@@ -16,6 +16,8 @@ export interface Env {
   RETENTION_PER_SOURCE?: string;
   MAX_FAILURES?: string;
   MAX_AD_AGE_HOURS?: string;
+  MIN_SELLER_AGE_DAYS?: string;
+  REQUIRE_SAFEDEAL?: string;
 }
 
 export interface Config {
@@ -28,6 +30,10 @@ export interface Config {
   maxFailures: number;
   /** How old an ad may be, by creation date, and still count as new. */
   maxAdAgeHours: number;
+  /** Sellers who registered more recently than this are skipped. 0 turns the check off. */
+  minSellerAgeDays: number;
+  /** Skip ads that do not offer OLX Доставка. */
+  requireSafedeal: boolean;
   /** Everyone allowed to run commands. Reports go to all of them. */
   ownerChatIds: number[];
 }
@@ -58,6 +64,19 @@ function num(value: string | undefined, fallback: number): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+/** Like num(), except 0 is meaningful here — it is how a threshold is switched off. */
+function threshold(value: string | undefined, fallback: number): number {
+  if (!value?.trim()) return fallback;
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
+function flag(value: string | undefined, fallback: boolean): boolean {
+  if (!value?.trim()) return fallback;
+  return /^(1|true|yes|on)$/i.test(value.trim());
+}
+
 /** Accepts one id or several, separated by commas, spaces or newlines. */
 export function parseOwnerIds(raw: string | undefined): number[] {
   const ids = (raw ?? '')
@@ -82,6 +101,10 @@ export function readConfig(env: Env): Config {
     retentionPerSource: num(env.RETENTION_PER_SOURCE, 500),
     maxFailures: num(env.MAX_FAILURES, 5),
     maxAdAgeHours: num(env.MAX_AD_AGE_HOURS, 24),
+    minSellerAgeDays: threshold(env.MIN_SELLER_AGE_DAYS, 30),
+    // Off by default: OLX Доставка only exists for shippable goods, so requiring
+    // it would empty a property, jobs or services search outright.
+    requireSafedeal: flag(env.REQUIRE_SAFEDEAL, false),
     ownerChatIds: parseOwnerIds(env.OWNER_CHAT_ID),
   };
 }

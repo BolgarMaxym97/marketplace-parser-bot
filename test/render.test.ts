@@ -47,6 +47,11 @@ describe('mapAds on the real /api/v1/offers response', () => {
     expect(ads[0]!.sellerName).toBe('Продавець 1');
   });
 
+  it('takes the seller registration date and the OLX Доставка flag', () => {
+    expect(ads[0]!.sellerCreatedTime).toBe('2015-05-18T14:01:19+03:00');
+    expect(ads[0]!.safedealActive).toBe(true);
+  });
+
   it('drops a region that only repeats the city', () => {
     const [ad] = mapAds(
       {
@@ -64,6 +69,8 @@ describe('mapAds on the real /api/v1/offers response', () => {
     expect(ad!.regionName).toBeNull();
     expect(ad!.condition).toBeNull();
     expect(ad!.sellerName).toBeNull();
+    expect(ad!.sellerCreatedTime).toBeNull();
+    expect(ad!.safedealActive).toBe(false);
   });
 });
 
@@ -124,6 +131,8 @@ describe('renderAd', () => {
     regionName: 'Вінницька обл.',
     condition: 'Вживане',
     sellerName: 'Максим',
+    sellerCreatedTime: '2015-05-18T14:01:19+03:00',
+    safedealActive: true,
     photoUrls: ['https://example.test/a.jpg'],
   };
 

@@ -45,3 +45,33 @@ describe('isOwner', () => {
     expect(isOwner(readConfig({} as Env), 111)).toBe(false);
   });
 });
+
+describe('seller trust settings', () => {
+  const read = (env: Partial<Env>) => readConfig(env as Env);
+
+  it('filters on account age by default and leaves OLX Доставка alone', () => {
+    expect(read({})).toMatchObject({ minSellerAgeDays: 30, requireSafedeal: false });
+  });
+
+  it('accepts 0 as "do not check the age at all"', () => {
+    expect(read({ MIN_SELLER_AGE_DAYS: '0' }).minSellerAgeDays).toBe(0);
+  });
+
+  it('falls back to the default on junk', () => {
+    expect(read({ MIN_SELLER_AGE_DAYS: 'soon' }).minSellerAgeDays).toBe(30);
+    expect(read({ MIN_SELLER_AGE_DAYS: '-5' }).minSellerAgeDays).toBe(30);
+    expect(read({ MIN_SELLER_AGE_DAYS: '  ' }).minSellerAgeDays).toBe(30);
+  });
+
+  it.each([
+    ['true', true],
+    ['1', true],
+    ['yes', true],
+    ['on', true],
+    ['false', false],
+    ['0', false],
+    ['nope', false],
+  ])('reads REQUIRE_SAFEDEAL=%s as %s', (raw, expected) => {
+    expect(read({ REQUIRE_SAFEDEAL: raw }).requireSafedeal).toBe(expected);
+  });
+});

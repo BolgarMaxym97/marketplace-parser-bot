@@ -6,6 +6,7 @@ Cloudflare Worker that watches OLX search results and broadcasts new ads to ever
 - Dedup key is OLX's own `ad.id`, and it is global — a bumped ad is never re-sent, and an ad matched by
   two overlapping searches goes out once, from whichever search claims it first
 - The first sweep of a new search is silent: everything found is recorded, only the owner gets a report
+- Ads from throwaway seller accounts are filtered out before broadcast — see [Seller trust](#seller-trust)
 
 ## How a search is resolved
 
@@ -21,6 +22,28 @@ auth, no cookies and no session.
 
 The GraphQL endpoint at `/apigateway/graphql` is deliberately not used: it serves *observed* ads rather than
 search results, and its bearer token expires after 15 minutes.
+
+## Seller trust
+
+OLX exposes no rating in `/api/v1/offers` — the score shown on an ad page comes from a separate service,
+one request per seller, which does not fit a 50-subrequest tick. So the filter uses only what the listing
+already carries and costs nothing extra:
+
+| Var | Default | Effect |
+|---|---|---|
+| `MIN_SELLER_AGE_DAYS` | `30` | Skip ads from accounts registered more recently than this. `0` turns the check off |
+| `REQUIRE_SAFEDEAL` | `false` | Skip ads that do not offer OLX Доставка |
+
+Account age is the one signal in the payload that separates a throwaway scam profile from an ordinary
+seller. OLX Доставка means a buyer can pay through OLX instead of transferring money upfront, but it only
+exists for shippable goods — switching `REQUIRE_SAFEDEAL` on empties a property, jobs or services search
+outright, which is why it ships off.
+
+A seller whose registration date OLX omits **passes**. The filter is there to trim spam, and a change in
+OLX's payload shape must not silently mute the feed. A rejected ad is left unrecorded rather than consumed;
+the age cutoff is what eventually retires it.
+
+The first sweep of a new search still records everything, however untrusted — it broadcasts nothing anyway.
 
 ## Setup
 
@@ -92,14 +115,15 @@ wholesale, so include yourself if you want to stay.
 ## Tests
 
 ```bash
-npm test            # 106 tests, no network
+npm test            # 124 tests, no network
 npm run test:live   # hits olx.ua: resolve → API → render
 npm run typecheck
 ```
 
 `npm test` covers rendering against a captured `/api/v1/offers` response, the page-state resolver,
-deduplication across searches, claim contention, silent initialisation, subrequest-budget exhaustion,
-Telegram `429`, a kicked chat, forum-topic routing, webhook auth and access control, and history retention.
+deduplication across searches, claim contention, silent initialisation, the seller-trust filter,
+subrequest-budget exhaustion, Telegram `429`, a kicked chat, forum-topic routing, webhook auth and access
+control, and history retention.
 
 The fixture in `test/fixtures/offers.json` is a real OLX response with seller identities pseudonymised.
 

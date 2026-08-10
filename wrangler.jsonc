@@ -31,7 +31,12 @@
 		"TIMEZONE": "Europe/Kyiv",
 		"RETENTION_PER_SOURCE": "500",
 		"MAX_FAILURES": "5",
-		"MAX_AD_AGE_HOURS": "24"
+		"MAX_AD_AGE_HOURS": "24",
+		// Seller trust, read straight off the listing — no extra request per seller.
+		// 0 turns the age check off; REQUIRE_SAFEDEAL empties a search in any
+		// category OLX Доставка does not cover (property, jobs, services).
+		"MIN_SELLER_AGE_DAYS": "30",
+		"REQUIRE_SAFEDEAL": "false"
 	},
 	"observability": {
 		"enabled": true

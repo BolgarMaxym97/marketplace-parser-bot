@@ -14,6 +14,10 @@ export interface OlxAd {
   /** "Вживане" / "Нове", when the category defines it. */
   condition: string | null;
   sellerName: string | null;
+  /** When the seller registered on OLX. ISO 8601, null when OLX omits it. */
+  sellerCreatedTime: string | null;
+  /** OLX Доставка is on offer, so a buyer can pay through OLX rather than upfront. */
+  safedealActive: boolean;
   photoUrls: string[];
 }
 

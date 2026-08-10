@@ -31,7 +31,8 @@ interface RawAd {
   params?: RawParam[];
   photos?: RawPhoto[];
   location?: { city?: RawPlace | null; region?: RawPlace | null } | null;
-  user?: { name?: string } | null;
+  user?: { name?: string; created?: string } | null;
+  safedeal?: { status?: string } | null;
 }
 
 export class OlxHttpError extends Error {
@@ -101,6 +102,8 @@ export function mapAds(payload: unknown, size: string): OlxAd[] {
       regionName: shortRegion(raw.location?.region, cityName),
       condition: selectLabel(raw.params, 'state'),
       sellerName: raw.user?.name?.trim() || null,
+      sellerCreatedTime: raw.user?.created ?? null,
+      safedealActive: raw.safedeal?.status === 'active',
       photoUrls: photoUrls(raw.photos, size),
     });
   }

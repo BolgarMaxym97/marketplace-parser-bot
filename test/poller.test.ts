@@ -2,7 +2,7 @@ import { env } from 'cloudflare:test';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Env } from '../src/config';
 import { pollSources } from '../src/poller';
-import { applySchema, hoursAgo, makeFetchStub, offersPayload, resetDb } from './helpers';
+import { applySchema, daysAgo, hoursAgo, makeFetchStub, offersPayload, resetDb } from './helpers';
 
 const DB = env.DB as D1Database;
 
@@ -279,6 +279,121 @@ describe('ad age', () => {
     await pollSources(testEnv());
 
     expect(await seenIds(sourceId)).toEqual([140, 141]);
+  });
+});
+
+describe('seller trust', () => {
+  it('skips an ad from an account younger than MIN_SELLER_AGE_DAYS', async () => {
+    const sourceId = await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({
+      offers: offersPayload([
+        { id: 400, title: 'throwaway', sellerCreated: daysAgo(3) },
+        { id: 401, title: 'established', sellerCreated: daysAgo(400) },
+      ]),
+    });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ MIN_SELLER_AGE_DAYS: '30' }));
+
+    const captions = stub.telegramCalls
+      .filter((call) => call.method === 'sendMediaGroup')
+      .map((call) => String((call.body.media as Array<{ caption?: string }>)[0]?.caption));
+
+    expect(captions).toHaveLength(1);
+    expect(captions[0]).toContain('established');
+    // Rejected, not consumed — nothing was delivered, so nothing may be recorded.
+    expect(await seenIds(sourceId)).toEqual([401]);
+  });
+
+  it('lets an account through on the day it reaches the threshold', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({
+      offers: offersPayload([{ id: 402, sellerCreated: daysAgo(30.01) }]),
+    });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ MIN_SELLER_AGE_DAYS: '30' }));
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(1);
+  });
+
+  it('checks nothing when MIN_SELLER_AGE_DAYS is 0', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 403, sellerCreated: hoursAgo(1) }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ MIN_SELLER_AGE_DAYS: '0' }));
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(1);
+  });
+
+  it('passes an ad whose seller has no registration date, rather than muting the feed', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 404, sellerCreated: null }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ MIN_SELLER_AGE_DAYS: '30' }));
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(1);
+  });
+
+  it('ignores OLX Доставка by default', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 405, safedeal: 'unactive' }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(1);
+  });
+
+  it('requires OLX Доставка once REQUIRE_SAFEDEAL is on', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({
+      offers: offersPayload([
+        { id: 406, title: 'no delivery', safedeal: 'unactive' },
+        { id: 407, title: 'with delivery', safedeal: 'active' },
+      ]),
+    });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ REQUIRE_SAFEDEAL: 'true' }));
+
+    const captions = stub.telegramCalls
+      .filter((call) => call.method === 'sendMediaGroup')
+      .map((call) => String((call.body.media as Array<{ caption?: string }>)[0]?.caption));
+
+    expect(captions).toHaveLength(1);
+    expect(captions[0]).toContain('with delivery');
+  });
+
+  it('still records every ad on the first sweep, however untrusted', async () => {
+    const sourceId = await seedSource(false);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({
+      offers: offersPayload([
+        { id: 410, sellerCreated: hoursAgo(1), safedeal: 'unactive' },
+        { id: 411 },
+      ]),
+    });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ MIN_SELLER_AGE_DAYS: '30', REQUIRE_SAFEDEAL: 'true' }));
+
+    expect(await seenIds(sourceId)).toEqual([410, 411]);
   });
 });
 

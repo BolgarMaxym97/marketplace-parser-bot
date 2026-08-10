@@ -23,6 +23,7 @@ interface TickState {
 }
 
 const HOUR_MS = 3_600_000;
+const DAY_MS = 86_400_000;
 
 /** Oldest first, so a chat reads chronologically. The API returns newest first. */
 const oldestFirst = (a: OlxAd, b: OlxAd): number =>
@@ -47,6 +48,29 @@ const createdAt = (ad: OlxAd): number => {
 const isRecent = (ad: OlxAd, floor: number): boolean => {
   const created = createdAt(ad);
   return created > 0 && created >= floor;
+};
+
+/** Registration time in milliseconds, or 0 when OLX sent nothing usable. */
+const registeredAt = (ad: OlxAd): number => {
+  const parsed = ad.sellerCreatedTime ? Date.parse(ad.sellerCreatedTime) : Number.NaN;
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+/**
+ * Trust filter built only from what the listing already carries, so it costs no
+ * extra subrequest per seller. A days-old account is the signal that separates a
+ * throwaway scam profile from an ordinary seller; OLX Доставка means the buyer
+ * can pay through OLX instead of transferring money upfront.
+ *
+ * An unreadable registration date passes rather than fails. The filter exists to
+ * trim spam, and a change in OLX's payload shape must not silently mute the feed.
+ */
+const isTrusted = (ad: OlxAd, config: Config, now: number): boolean => {
+  if (config.requireSafedeal && !ad.safedealActive) return false;
+  if (config.minSellerAgeDays === 0) return true;
+
+  const registered = registeredAt(ad);
+  return registered === 0 || now - registered >= config.minSellerAgeDays * DAY_MS;
 };
 
 /** Reports go to every owner. Returns how many subrequests it spent. */
@@ -109,12 +133,16 @@ async function processSource(
   // The watermark rules out anything already overtaken; the age cutoff covers a
   // source that has never delivered, and caps how far back a stale watermark
   // could reach.
-  const cutoff = Math.floor((Date.now() - config.maxAdAgeHours * HOUR_MS) / 1000);
+  const now = Date.now();
+  const cutoff = Math.floor((now - config.maxAdAgeHours * HOUR_MS) / 1000);
   const floor = Math.max(cutoff, source.last_created_at ?? 0);
-  const recent = ads.filter((ad) => isRecent(ad, floor));
 
-  const unseen = await filterUnseen(deps.db, recent.map((ad) => ad.id));
-  const fresh = recent.filter((ad) => unseen.has(ad.id)).sort(oldestFirst);
+  // A rejected ad is left unseen rather than recorded — it was never delivered,
+  // and the watermark is what keeps it from being reconsidered forever.
+  const eligible = ads.filter((ad) => isRecent(ad, floor) && isTrusted(ad, config, now));
+
+  const unseen = await filterUnseen(deps.db, eligible.map((ad) => ad.id));
+  const fresh = eligible.filter((ad) => unseen.has(ad.id)).sort(oldestFirst);
 
   // Oldest first means every ad left in the loop is newer than the one just sent,
   // so a tick cut short by the budget leaves the watermark below them.

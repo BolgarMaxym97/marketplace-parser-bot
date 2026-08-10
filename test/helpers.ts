@@ -82,10 +82,23 @@ export function makeFetchStub(options: FetchStubOptions): FetchStub {
 export const hoursAgo = (hours: number): string =>
   new Date(Date.now() - hours * 3_600_000).toISOString();
 
+export const daysAgo = (days: number): string => hoursAgo(days * 24);
+
+/** Old enough to clear the default MIN_SELLER_AGE_DAYS without saying so in every fixture. */
+const ESTABLISHED_SELLER = '2015-05-18T14:01:19+03:00';
+
+interface AdFixture {
+  id: number;
+  title?: string;
+  created?: string;
+  photos?: number;
+  /** `null` omits the field, which is how OLX behaves when it has nothing to send. */
+  sellerCreated?: string | null;
+  safedeal?: string;
+}
+
 /** Builds an offers payload shaped like the real /api/v1/offers response. */
-export function offersPayload(
-  ads: Array<{ id: number; title?: string; created?: string; photos?: number }>,
-): unknown {
+export function offersPayload(ads: AdFixture[]): unknown {
   return {
     data: ads.map((ad) => ({
       id: ad.id,
@@ -98,7 +111,11 @@ export function offersPayload(
         { key: 'state', value: { key: 'used', label: 'Вживане' } },
       ],
       location: { city: { name: 'Гнівань' }, region: { name: 'Вінницька область' } },
-      user: { name: 'Максим' },
+      user:
+        ad.sellerCreated === null
+          ? { name: 'Максим' }
+          : { name: 'Максим', created: ad.sellerCreated ?? ESTABLISHED_SELLER },
+      safedeal: { status: ad.safedeal ?? 'active', safedeal_blocked: false },
       photos: Array.from({ length: ad.photos ?? 2 }, (_, index) => ({
         link: `https://ireland.apollo.olxcdn.com:443/v1/files/photo-${ad.id}-${index}/image;s={width}x{height}`,
       })),
