@@ -50,6 +50,14 @@ const isRecent = (ad: OlxAd, floor: number): boolean => {
   return created > 0 && created >= floor;
 };
 
+/**
+ * An ad with no figure on it — a bare "Договірна", an exchange, a giveaway —
+ * cannot be judged from the feed, so it is not worth a broadcast. A price marked
+ * negotiable still carries its figure and passes.
+ */
+const hasPrice = (ad: OlxAd, config: Config): boolean =>
+  !config.requirePrice || ad.priceValue !== null;
+
 /** Registration time in milliseconds, or 0 when OLX sent nothing usable. */
 const registeredAt = (ad: OlxAd): number => {
   const parsed = ad.sellerCreatedTime ? Date.parse(ad.sellerCreatedTime) : Number.NaN;
@@ -139,7 +147,9 @@ async function processSource(
 
   // A rejected ad is left unseen rather than recorded — it was never delivered,
   // and the watermark is what keeps it from being reconsidered forever.
-  const eligible = ads.filter((ad) => isRecent(ad, floor) && isTrusted(ad, config, now));
+  const eligible = ads.filter(
+    (ad) => isRecent(ad, floor) && hasPrice(ad, config) && isTrusted(ad, config, now),
+  );
 
   const unseen = await filterUnseen(deps.db, eligible.map((ad) => ad.id));
   const fresh = eligible.filter((ad) => unseen.has(ad.id)).sort(oldestFirst);

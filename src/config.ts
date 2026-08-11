@@ -18,6 +18,7 @@ export interface Env {
   MAX_AD_AGE_HOURS?: string;
   MIN_SELLER_AGE_DAYS?: string;
   REQUIRE_SAFEDEAL?: string;
+  REQUIRE_PRICE?: string;
 }
 
 export interface Config {
@@ -34,6 +35,8 @@ export interface Config {
   minSellerAgeDays: number;
   /** Skip ads that do not offer OLX Доставка. */
   requireSafedeal: boolean;
+  /** Skip ads that name no price — a bare "Договірна", an exchange, a giveaway. */
+  requirePrice: boolean;
   /** Everyone allowed to run commands. Reports go to all of them. */
   ownerChatIds: number[];
 }
@@ -105,6 +108,9 @@ export function readConfig(env: Env): Config {
     // Off by default: OLX Доставка only exists for shippable goods, so requiring
     // it would empty a property, jobs or services search outright.
     requireSafedeal: flag(env.REQUIRE_SAFEDEAL, false),
+    // On by default: an ad with no figure on it cannot be judged from the feed,
+    // and a negotiable price still carries one, so this costs no real listings.
+    requirePrice: flag(env.REQUIRE_PRICE, true),
     ownerChatIds: parseOwnerIds(env.OWNER_CHAT_ID),
   };
 }

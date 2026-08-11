@@ -95,6 +95,37 @@ interface AdFixture {
   /** `null` omits the field, which is how OLX behaves when it has nothing to send. */
   sellerCreated?: string | null;
   safedeal?: string;
+  /**
+   * A figure, `'arranged'` for a "Договірна" with nothing behind it,
+   * `'negotiable'` for a figure OLX marks as haggle-friendly, or `null` for an
+   * ad OLX sends without a price param at all.
+   */
+  price?: number | 'arranged' | 'negotiable' | null;
+}
+
+/** The price shapes OLX actually sends, kept in one place. */
+function priceParams(price: AdFixture['price']): unknown[] {
+  if (price === null) return [];
+
+  if (price === 'arranged') {
+    return [{ key: 'price', value: { value: null, currency: 'UAH', label: 'Договірна', arranged: true } }];
+  }
+
+  const negotiable = price === 'negotiable';
+  const value = negotiable || price === undefined ? 2300 : price;
+
+  return [
+    {
+      key: 'price',
+      value: {
+        value,
+        currency: 'UAH',
+        label: `${value} грн.`,
+        arranged: false,
+        negotiable,
+      },
+    },
+  ];
 }
 
 /** Builds an offers payload shaped like the real /api/v1/offers response. */
@@ -107,7 +138,7 @@ export function offersPayload(ads: AdFixture[]): unknown {
       description: 'Опис<br />другий рядок',
       created_time: ad.created ?? hoursAgo(1),
       params: [
-        { key: 'price', value: { value: 2300, currency: 'UAH', label: '2 300 грн.', arranged: false } },
+        ...priceParams(ad.price),
         { key: 'state', value: { key: 'used', label: 'Вживане' } },
       ],
       location: { city: { name: 'Гнівань' }, region: { name: 'Вінницька область' } },

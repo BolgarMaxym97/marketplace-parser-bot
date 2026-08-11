@@ -15,8 +15,9 @@ describe('mapAds on the real /api/v1/offers response', () => {
     expect(ads).toHaveLength(9);
   });
 
-  it('pulls the price label out of params', () => {
+  it('pulls the price label and figure out of params', () => {
     expect(ads[0]!.priceLabel).toBe('12 163 грн.');
+    expect(ads[0]!.priceValue).toBe(12163);
   });
 
   it('resolves photo URLs to a concrete size', () => {
@@ -74,6 +75,48 @@ describe('mapAds on the real /api/v1/offers response', () => {
   });
 });
 
+describe('price mapping', () => {
+  const priceOf = (value: unknown) =>
+    mapAds(
+      {
+        data: [
+          {
+            id: 1,
+            url: 'https://www.olx.ua/d/uk/obyavlenie/x.html',
+            created_time: '2026-08-09T15:00:00+03:00',
+            params: value === undefined ? [] : [{ key: 'price', value }],
+          },
+        ],
+      },
+      '1000x700',
+    )[0]!;
+
+  it('keeps the figure of a price marked negotiable, and says so', () => {
+    const ad = priceOf({ value: 12163, label: '12 163 грн.', negotiable: true, arranged: false });
+
+    expect(ad.priceValue).toBe(12163);
+    expect(ad.priceLabel).toBe('12 163 грн. (договірна)');
+  });
+
+  it('keeps the figure even when OLX also flags the price as arranged', () => {
+    const ad = priceOf({ value: 500, label: '500 грн.', arranged: true });
+
+    expect(ad.priceValue).toBe(500);
+    expect(ad.priceLabel).toBe('500 грн. (договірна)');
+  });
+
+  it.each([
+    ['arranged with nothing behind it', { value: null, label: 'Договірна', arranged: true }, 'Договірна'],
+    ['a zero price', { value: 0, label: 'Безкоштовно' }, 'Безкоштовно'],
+    ['no price param at all', undefined, 'Ціна не вказана'],
+  ])('reports no figure for %s', (_name, value, label) => {
+    const ad = priceOf(value);
+
+    expect(ad.priceValue).toBeNull();
+    expect(ad.priceLabel).toBe(label);
+  });
+});
+
 describe('text helpers', () => {
   it('turns <br /> into newlines and decodes entities', () => {
     expect(htmlToPlainText('a<br />b<br/>&amp; c&nbsp;d')).toBe('a\nb\n& c d');
@@ -127,6 +170,7 @@ describe('renderAd', () => {
     description: 'Продам приставку в комплекті одна гра.<br />Немає кабеля зарядки',
     createdTime: '2026-08-09T15:00:00+03:00',
     priceLabel: '2 300 грн.',
+    priceValue: 2300,
     cityName: 'Гнівань',
     regionName: 'Вінницька обл.',
     condition: 'Вживане',

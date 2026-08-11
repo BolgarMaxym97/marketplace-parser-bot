@@ -8,6 +8,8 @@ export interface OlxAd {
   /** ISO 8601 with offset, e.g. 2026-08-09T15:00:00+03:00 */
   createdTime: string;
   priceLabel: string;
+  /** The figure OLX put on the ad, null when it names no price at all. */
+  priceValue: number | null;
   cityName: string | null;
   /** Shortened, e.g. "Вінницька обл." */
   regionName: string | null;

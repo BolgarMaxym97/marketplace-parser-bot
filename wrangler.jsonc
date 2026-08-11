@@ -36,7 +36,9 @@
 		// 0 turns the age check off; REQUIRE_SAFEDEAL empties a search in any
 		// category OLX Доставка does not cover (property, jobs, services).
 		"MIN_SELLER_AGE_DAYS": "7",
-		"REQUIRE_SAFEDEAL": "false"
+		"REQUIRE_SAFEDEAL": "false",
+		// Skip ads with no figure on them — a bare "Договірна", an exchange, a giveaway.
+		"REQUIRE_PRICE": "true"
 	},
 	"observability": {
 		"enabled": true

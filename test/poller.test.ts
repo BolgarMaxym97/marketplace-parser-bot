@@ -379,6 +379,42 @@ describe('seller trust', () => {
     expect(captions[0]).toContain('with delivery');
   });
 
+  it('skips an ad that names no price, and keeps a negotiable one', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({
+      offers: offersPayload([
+        { id: 420, title: 'bare arranged', price: 'arranged' },
+        { id: 421, title: 'no price param', price: null },
+        { id: 422, title: 'negotiable figure', price: 'negotiable' },
+      ]),
+    });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    const captions = stub.telegramCalls
+      .filter((call) => call.method === 'sendMediaGroup')
+      .map((call) => String((call.body.media as Array<{ caption?: string }>)[0]?.caption));
+
+    expect(captions).toHaveLength(1);
+    expect(captions[0]).toContain('negotiable figure');
+    expect(captions[0]).toContain('2300 грн. (договірна)');
+  });
+
+  it('sends priceless ads once REQUIRE_PRICE is off', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 423, price: 'arranged' }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ REQUIRE_PRICE: 'false' }));
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(1);
+  });
+
   it('still records every ad on the first sweep, however untrusted', async () => {
     const sourceId = await seedSource(false);
     await seedChats(-100);
@@ -387,13 +423,14 @@ describe('seller trust', () => {
       offers: offersPayload([
         { id: 410, sellerCreated: hoursAgo(1), safedeal: 'unactive' },
         { id: 411 },
+        { id: 412, price: 'arranged' },
       ]),
     });
     vi.stubGlobal('fetch', stub.fetch);
 
     await pollSources(testEnv({ MIN_SELLER_AGE_DAYS: '30', REQUIRE_SAFEDEAL: 'true' }));
 
-    expect(await seenIds(sourceId)).toEqual([410, 411]);
+    expect(await seenIds(sourceId)).toEqual([410, 411, 412]);
   });
 });
 

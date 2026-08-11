@@ -7,6 +7,7 @@ Cloudflare Worker that watches OLX search results and broadcasts new ads to ever
   two overlapping searches goes out once, from whichever search claims it first
 - The first sweep of a new search is silent: everything found is recorded, only the owner gets a report
 - Ads from throwaway seller accounts are filtered out before broadcast — see [Seller trust](#seller-trust)
+- Ads that name no price are filtered out too — see [Price](#price)
 
 ## How a search is resolved
 
@@ -44,6 +45,21 @@ OLX's payload shape must not silently mute the feed. A rejected ad is left unrec
 the age cutoff is what eventually retires it.
 
 The first sweep of a new search still records everything, however untrusted — it broadcasts nothing anyway.
+
+## Price
+
+| Var | Default | Effect |
+|---|---|---|
+| `REQUIRE_PRICE` | `true` | Skip ads that name no price. Set to `false` to receive them |
+
+OLX has two different things that both read as "Договірна". One is a figure the seller marks as
+haggle-friendly: `value` holds the number and `negotiable` (or `arranged`) is just a flag next to it. The
+other is an ad with no number at all — `value` is `null`, and so are exchanges and giveaways. Only the second
+kind is skipped; a negotiable price goes out with its figure and a `(договірна)` note after it.
+
+The filter reads `value`, never the label, so a wording change on OLX's side cannot turn a priced ad into a
+skipped one. A rejected ad is left unrecorded rather than consumed, exactly as with seller trust, and the
+first sweep of a new search still records it.
 
 ## Setup
 
@@ -115,13 +131,13 @@ wholesale, so include yourself if you want to stay.
 ## Tests
 
 ```bash
-npm test            # 124 tests, no network
+npm test            # 137 tests, no network
 npm run test:live   # hits olx.ua: resolve → API → render
 npm run typecheck
 ```
 
 `npm test` covers rendering against a captured `/api/v1/offers` response, the page-state resolver,
-deduplication across searches, claim contention, silent initialisation, the seller-trust filter,
+deduplication across searches, claim contention, silent initialisation, the seller-trust and price filters,
 subrequest-budget exhaustion, Telegram `429`, a kicked chat, forum-topic routing, webhook auth and access
 control, and history retention.
 

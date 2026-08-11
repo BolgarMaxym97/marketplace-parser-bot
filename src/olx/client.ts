@@ -4,6 +4,7 @@ import type { OlxAd } from './types';
 interface RawPriceValue {
   label?: string | null;
   arranged?: boolean;
+  negotiable?: boolean;
   budget?: boolean;
   value?: number | null;
   currency?: string | null;
@@ -42,14 +43,31 @@ export class OlxHttpError extends Error {
   }
 }
 
-function priceLabel(params: RawParam[] | undefined): string {
-  const price = params?.find((p) => p.key === 'price')?.value;
-  if (!price || typeof price !== 'object') return 'Ціна не вказана';
+interface AdPrice {
+  label: string;
+  /** null when the ad names no figure — that is what makes it filterable. */
+  value: number | null;
+}
 
-  const raw = price as RawPriceValue;
-  if (raw.arranged) return 'Договірна';
-  if (raw.label) return raw.label;
-  return 'Ціна не вказана';
+/**
+ * OLX flags a haggle-friendly price with `arranged`/`negotiable` yet still sends
+ * the figure, so a flag alone does not mean "no price" — only a missing, null or
+ * zero `value` does, which is the bare "Договірна", the exchange and the giveaway.
+ *
+ * The label therefore leads with the figure whenever there is one and only notes
+ * that it is negotiable; the flag used to overwrite the number outright.
+ */
+function price(params: RawParam[] | undefined): AdPrice {
+  const raw = params?.find((p) => p.key === 'price')?.value;
+  if (!raw || typeof raw !== 'object') return { label: 'Ціна не вказана', value: null };
+
+  const { label, value, arranged, negotiable } = raw as RawPriceValue;
+  const amount = typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
+
+  if (amount === null) return { label: arranged ? 'Договірна' : label || 'Ціна не вказана', value: null };
+
+  const text = label || `${amount}`;
+  return { label: arranged || negotiable ? `${text} (договірна)` : text, value: amount };
 }
 
 /** Reads the label of a `select` param, e.g. state -> "Вживане". */
@@ -90,6 +108,7 @@ export function mapAds(payload: unknown, size: string): OlxAd[] {
     if (typeof raw?.id !== 'number' || !raw.url || !raw.created_time) continue;
 
     const cityName = raw.location?.city?.name ?? null;
+    const { label, value } = price(raw.params);
 
     ads.push({
       id: raw.id,
@@ -97,7 +116,8 @@ export function mapAds(payload: unknown, size: string): OlxAd[] {
       url: raw.url,
       description: raw.description ?? '',
       createdTime: raw.created_time,
-      priceLabel: priceLabel(raw.params),
+      priceLabel: label,
+      priceValue: value,
       cityName,
       regionName: shortRegion(raw.location?.region, cityName),
       condition: selectLabel(raw.params, 'state'),

@@ -75,3 +75,22 @@ describe('seller trust settings', () => {
     expect(read({ REQUIRE_SAFEDEAL: raw }).requireSafedeal).toBe(expected);
   });
 });
+
+describe('price setting', () => {
+  const read = (env: Partial<Env>) => readConfig(env as Env);
+
+  it('requires a price by default', () => {
+    expect(read({}).requirePrice).toBe(true);
+    expect(read({ REQUIRE_PRICE: '  ' }).requirePrice).toBe(true);
+  });
+
+  it.each([
+    ['false', false],
+    ['0', false],
+    ['off', false],
+    ['true', true],
+    ['1', true],
+  ])('reads REQUIRE_PRICE=%s as %s', (raw, expected) => {
+    expect(read({ REQUIRE_PRICE: raw }).requirePrice).toBe(expected);
+  });
+});
