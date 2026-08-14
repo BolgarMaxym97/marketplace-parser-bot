@@ -19,6 +19,8 @@ export interface Env {
   MIN_SELLER_AGE_DAYS?: string;
   REQUIRE_SAFEDEAL?: string;
   REQUIRE_PRICE?: string;
+  /** Shop slugs and/or seller ids to skip: "retromagaz,12345". */
+  BLOCKED_SELLERS?: string;
 }
 
 export interface Config {
@@ -37,6 +39,8 @@ export interface Config {
   requireSafedeal: boolean;
   /** Skip ads that name no price — a bare "Договірна", an exchange, a giveaway. */
   requirePrice: boolean;
+  /** Shop slugs and seller ids whose ads never go out. Lowercased, as strings. */
+  blockedSellers: Set<string>;
   /** Everyone allowed to run commands. Reports go to all of them. */
   ownerChatIds: number[];
 }
@@ -91,6 +95,21 @@ export function parseOwnerIds(raw: string | undefined): number[] {
   return [...new Set(ids)];
 }
 
+/**
+ * A blocked seller is named either by shop slug — the `retromagaz` of
+ * retromagaz.olx.ua — or by numeric OLX account id, since a private seller has
+ * no slug. Both live in one set: the two never collide, and matching is a plain
+ * string lookup on either field of an ad.
+ */
+export function parseBlockedSellers(raw: string | undefined): Set<string> {
+  const entries = (raw ?? '')
+    .split(/[\s,;]+/)
+    .map((part) => part.trim().toLowerCase())
+    .filter((part) => part.length > 0);
+
+  return new Set(entries);
+}
+
 export const isOwner = (config: Config, chatId: number): boolean =>
   config.ownerChatIds.includes(chatId);
 
@@ -111,6 +130,7 @@ export function readConfig(env: Env): Config {
     // On by default: an ad with no figure on it cannot be judged from the feed,
     // and a negotiable price still carries one, so this costs no real listings.
     requirePrice: flag(env.REQUIRE_PRICE, true),
+    blockedSellers: parseBlockedSellers(env.BLOCKED_SELLERS),
     ownerChatIds: parseOwnerIds(env.OWNER_CHAT_ID),
   };
 }

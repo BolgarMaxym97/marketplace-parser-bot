@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isOwner, parseOwnerIds, readConfig, type Env } from '../src/config';
+import { isOwner, parseBlockedSellers, parseOwnerIds, readConfig, type Env } from '../src/config';
 
 describe('parseOwnerIds', () => {
   it('reads a single id', () => {
@@ -92,5 +92,30 @@ describe('price setting', () => {
     ['1', true],
   ])('reads REQUIRE_PRICE=%s as %s', (raw, expected) => {
     expect(read({ REQUIRE_PRICE: raw }).requirePrice).toBe(expected);
+  });
+});
+
+describe('parseBlockedSellers', () => {
+  it('reads a single shop slug', () => {
+    expect(parseBlockedSellers('retromagaz')).toEqual(new Set(['retromagaz']));
+  });
+
+  it.each([
+    ['retromagaz,12345', ['retromagaz', '12345']],
+    ['retromagaz, 12345 ', ['retromagaz', '12345']],
+    ['retromagaz 12345\nfoo', ['retromagaz', '12345', 'foo']],
+    ['retromagaz;12345', ['retromagaz', '12345']],
+  ])('splits %s', (raw, expected) => {
+    expect(parseBlockedSellers(raw)).toEqual(new Set(expected));
+  });
+
+  it('lowercases, so a slug matches however it was typed', () => {
+    expect(parseBlockedSellers('RetroMagaz')).toEqual(new Set(['retromagaz']));
+  });
+
+  it('blocks nobody when unset', () => {
+    expect(parseBlockedSellers(undefined).size).toBe(0);
+    expect(parseBlockedSellers('  ').size).toBe(0);
+    expect(readConfig({} as Env).blockedSellers.size).toBe(0);
   });
 });

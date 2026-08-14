@@ -61,6 +61,16 @@ The filter reads `value`, never the label, so a wording change on OLX's side can
 skipped one. A rejected ad is left unrecorded rather than consumed, exactly as with seller trust, and the
 first sweep of a new search still records it.
 
+## Blocked sellers
+
+| Var | Default | Effect |
+|---|---|---|
+| `BLOCKED_SELLERS` | `retromagaz` | Sellers whose ads never go out, separated by commas |
+
+An entry is either a shop slug — the `retromagaz` of `retromagaz.olx.ua` — or a numeric OLX account id,
+which is how a private seller with no shop page is named. Matching is case-insensitive and, as with the
+other filters, a rejected ad is left unrecorded rather than consumed.
+
 ## Setup
 
 ```bash

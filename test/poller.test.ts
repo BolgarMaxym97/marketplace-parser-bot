@@ -434,6 +434,70 @@ describe('seller trust', () => {
   });
 });
 
+describe('blocked sellers', () => {
+  it('skips a shop named by its slug and leaves everyone else alone', async () => {
+    const sourceId = await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({
+      offers: offersPayload([
+        { id: 500, title: 'shop', shop: 'retromagaz' },
+        { id: 501, title: 'private' },
+      ]),
+    });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ BLOCKED_SELLERS: 'retromagaz' }));
+
+    const captions = stub.telegramCalls
+      .filter((call) => call.method === 'sendMediaGroup')
+      .map((call) => String((call.body.media as Array<{ caption?: string }>)[0]?.caption));
+
+    expect(captions).toHaveLength(1);
+    expect(captions[0]).toContain('private');
+    // Rejected, not consumed — the blocked ad was never delivered.
+    expect(await seenIds(sourceId)).toEqual([501]);
+  });
+
+  it('matches the slug whatever the case', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 502, shop: 'RetroMagaz' }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ BLOCKED_SELLERS: 'RETROMAGAZ' }));
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(0);
+  });
+
+  it('skips a private seller named by account id', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({
+      offers: offersPayload([{ id: 503, sellerId: 98765 }, { id: 504, sellerId: 11111 }]),
+    });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ BLOCKED_SELLERS: 'retromagaz,98765' }));
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(1);
+  });
+
+  it('blocks nobody when the list is empty', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 505, shop: 'retromagaz' }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ BLOCKED_SELLERS: '' }));
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(1);
+  });
+});
+
 describe('watermark', () => {
   it('starts at the newest ad of the first sweep', async () => {
     const sourceId = await seedSource(false);

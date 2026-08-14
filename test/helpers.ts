@@ -94,6 +94,9 @@ interface AdFixture {
   photos?: number;
   /** `null` omits the field, which is how OLX behaves when it has nothing to send. */
   sellerCreated?: string | null;
+  sellerId?: number;
+  /** Shop slug, as OLX sends it for a shop account. Private sellers get null. */
+  shop?: string;
   safedeal?: string;
   /**
    * A figure, `'arranged'` for a "Договірна" with nothing behind it,
@@ -144,9 +147,14 @@ export function offersPayload(ads: AdFixture[]): unknown {
       location: { city: { name: 'Гнівань' }, region: { name: 'Вінницька область' } },
       user:
         ad.sellerCreated === null
-          ? { name: 'Максим' }
-          : { name: 'Максим', created: ad.sellerCreated ?? ESTABLISHED_SELLER },
+          ? { id: ad.sellerId ?? 1001, name: 'Максим' }
+          : {
+              id: ad.sellerId ?? 1001,
+              name: 'Максим',
+              created: ad.sellerCreated ?? ESTABLISHED_SELLER,
+            },
       safedeal: { status: ad.safedeal ?? 'active', safedeal_blocked: false },
+      shop: { subdomain: ad.shop ?? null },
       photos: Array.from({ length: ad.photos ?? 2 }, (_, index) => ({
         link: `https://ireland.apollo.olxcdn.com:443/v1/files/photo-${ad.id}-${index}/image;s={width}x{height}`,
       })),

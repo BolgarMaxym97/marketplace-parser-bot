@@ -81,6 +81,19 @@ const isTrusted = (ad: OlxAd, config: Config, now: number): boolean => {
   return registered === 0 || now - registered >= config.minSellerAgeDays * DAY_MS;
 };
 
+/**
+ * A named seller is muted outright, whatever else the ad looks like: a shop that
+ * keeps reposting the same stock, or a profile that turned out to be a waste of
+ * time. Matched on shop slug or account id, so both a shop and a private seller
+ * can be named.
+ */
+const isBlocked = (ad: OlxAd, config: Config): boolean => {
+  if (config.blockedSellers.size === 0) return false;
+
+  if (ad.shopSubdomain !== null && config.blockedSellers.has(ad.shopSubdomain)) return true;
+  return ad.sellerId !== null && config.blockedSellers.has(String(ad.sellerId));
+};
+
 /** Reports go to every owner. Returns how many subrequests it spent. */
 async function notifyOwners(telegram: TelegramClient, config: Config, text: string): Promise<number> {
   for (const ownerId of config.ownerChatIds) {
@@ -148,7 +161,11 @@ async function processSource(
   // A rejected ad is left unseen rather than recorded — it was never delivered,
   // and the watermark is what keeps it from being reconsidered forever.
   const eligible = ads.filter(
-    (ad) => isRecent(ad, floor) && hasPrice(ad, config) && isTrusted(ad, config, now),
+    (ad) =>
+      isRecent(ad, floor) &&
+      hasPrice(ad, config) &&
+      isTrusted(ad, config, now) &&
+      !isBlocked(ad, config),
   );
 
   const unseen = await filterUnseen(deps.db, eligible.map((ad) => ad.id));

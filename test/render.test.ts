@@ -53,6 +53,30 @@ describe('mapAds on the real /api/v1/offers response', () => {
     expect(ads[0]!.safedealActive).toBe(true);
   });
 
+  it('takes the seller id, and leaves the shop slug null for a private seller', () => {
+    expect(ads[0]!.sellerId).toBe(1001);
+    expect(ads[0]!.shopSubdomain).toBeNull();
+  });
+
+  it('lowercases the shop slug so it matches a blocklist entry', () => {
+    const [ad] = mapAds(
+      {
+        data: [
+          {
+            id: 1,
+            url: 'https://www.olx.ua/d/uk/obyavlenie/x.html',
+            created_time: '2026-08-09T15:00:00+03:00',
+            user: { id: 42, name: 'Крамниця' },
+            shop: { subdomain: ' RetroMagaz ' },
+          },
+        ],
+      },
+      '1000x700',
+    );
+    expect(ad!.shopSubdomain).toBe('retromagaz');
+    expect(ad!.sellerId).toBe(42);
+  });
+
   it('drops a region that only repeats the city', () => {
     const [ad] = mapAds(
       {
@@ -70,6 +94,8 @@ describe('mapAds on the real /api/v1/offers response', () => {
     expect(ad!.regionName).toBeNull();
     expect(ad!.condition).toBeNull();
     expect(ad!.sellerName).toBeNull();
+    expect(ad!.sellerId).toBeNull();
+    expect(ad!.shopSubdomain).toBeNull();
     expect(ad!.sellerCreatedTime).toBeNull();
     expect(ad!.safedealActive).toBe(false);
   });
@@ -175,7 +201,9 @@ describe('renderAd', () => {
     regionName: 'Вінницька обл.',
     condition: 'Вживане',
     sellerName: 'Максим',
+    sellerId: 1001,
     sellerCreatedTime: '2015-05-18T14:01:19+03:00',
+    shopSubdomain: null,
     safedealActive: true,
     photoUrls: ['https://example.test/a.jpg'],
   };

@@ -38,7 +38,10 @@
 		"MIN_SELLER_AGE_DAYS": "7",
 		"REQUIRE_SAFEDEAL": "false",
 		// Skip ads with no figure on them — a bare "Договірна", an exchange, a giveaway.
-		"REQUIRE_PRICE": "true"
+		"REQUIRE_PRICE": "true",
+		// Sellers whose ads never go out. Shop slug (retromagaz.olx.ua -> "retromagaz")
+		// or numeric OLX account id, separated by commas.
+		"BLOCKED_SELLERS": "retromagaz"
 	},
 	"observability": {
 		"enabled": true
