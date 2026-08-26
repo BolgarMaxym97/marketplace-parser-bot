@@ -221,6 +221,232 @@ describe('access control', () => {
   });
 });
 
+describe('/business', () => {
+  const setting = () =>
+    DB.prepare("SELECT value FROM settings WHERE key = 'allow_business_ads'").first<{ value: string }>();
+
+  const reply = () => String(calls.at(-1)!.body.text);
+
+  it('reports the env default while no row is written', async () => {
+    await handleWebhook(post(message('/business', { id: OWNER, type: 'private' })), testEnv());
+
+    expect(reply()).toContain('вимкнено');
+    expect(await setting()).toBeNull();
+  });
+
+  it('turns business ads on and off, and the row survives the env default', async () => {
+    await handleWebhook(post(message('/business on', { id: OWNER, type: 'private' })), testEnv());
+    expect((await setting())!.value).toBe('1');
+
+    await handleWebhook(post(message('/business', { id: OWNER, type: 'private' })), testEnv());
+    expect(reply()).toContain('увімкнено');
+
+    await handleWebhook(post(message('/business off', { id: OWNER, type: 'private' })), testEnv());
+    expect((await setting())!.value).toBe('0');
+
+    // ALLOW_BUSINESS_ADS says yes; the owner said no, and the owner wins.
+    await handleWebhook(
+      post(message('/business', { id: OWNER, type: 'private' })),
+      testEnv({ ALLOW_BUSINESS_ADS: 'true' }),
+    );
+    expect(reply()).toContain('вимкнено');
+  });
+
+  it('rejects an argument it does not understand and writes nothing', async () => {
+    await handleWebhook(post(message('/business maybe', { id: OWNER, type: 'private' })), testEnv());
+
+    expect(reply()).toContain('/business on');
+    expect(await setting()).toBeNull();
+  });
+
+  it('will not let a non-owner change it', async () => {
+    await handleWebhook(post(message('/business on', { id: 999, type: 'private' }, 999)), testEnv());
+
+    expect(calls).toHaveLength(0);
+    expect(await setting()).toBeNull();
+  });
+});
+
+describe('/add and /add-for-me', () => {
+  // An api/v1/offers URL is taken as-is, so nothing has to resolve a search page.
+  const API = 'https://www.olx.ua/api/v1/offers?query=test';
+
+  const reply = () => String(calls.at(-1)!.body.text);
+
+  const send = (text: string) =>
+    handleWebhook(post(message(text, { id: OWNER, type: 'private' })), testEnv());
+
+  const sourceRow = () =>
+    DB.prepare('SELECT id, private_only FROM sources ORDER BY id DESC').first<{
+      id: number;
+      private_only: number;
+    }>();
+
+  it('adds an ordinary search that feeds every chat', async () => {
+    await send(`/add ${API}`);
+
+    expect((await sourceRow())!.private_only).toBe(0);
+    expect(reply()).toContain('В усі підписані чати');
+  });
+
+  it('adds a private-only search and says so', async () => {
+    await send(`/add-for-me ${API}`);
+
+    expect((await sourceRow())!.private_only).toBe(1);
+    expect(reply()).toContain('Тільки в особисті чати');
+  });
+
+  it('marks a private-only search in /list', async () => {
+    await send(`/add-for-me ${API}`);
+    await send('/list');
+
+    expect(reply()).toContain('👤');
+  });
+
+  it('leaves the flag of an existing search alone and says how to change it', async () => {
+    await send(`/add ${API}`);
+    const before = await sourceRow();
+
+    await send(`/add-for-me ${API}`);
+
+    expect(reply()).toContain('уже додано');
+    expect((await sourceRow())!.id).toBe(before!.id);
+    expect((await sourceRow())!.private_only).toBe(0);
+  });
+
+  it('will not let a non-owner add anything', async () => {
+    await handleWebhook(post(message(`/add-for-me ${API}`, { id: 999, type: 'private' }, 999)), testEnv());
+
+    expect(calls).toHaveLength(0);
+    expect(await sourceRow()).toBeNull();
+  });
+});
+
+describe('/hours', () => {
+  const setting = () =>
+    DB.prepare("SELECT value FROM settings WHERE key = 'group_hours'").first<{ value: string }>();
+
+  const reply = () => String(calls.at(-1)!.body.text);
+
+  const send = (text: string, env = testEnv()) =>
+    handleWebhook(post(message(text, { id: OWNER, type: 'private' })), env);
+
+  it('reports the env window, and says the private chat is never held back', async () => {
+    await send('/hours');
+
+    expect(reply()).toContain('09:00–23:00');
+    expect(reply()).toContain('цілодобово');
+    expect(await setting()).toBeNull();
+  });
+
+  it('sets a window and reports it back', async () => {
+    await send('/hours 10-20');
+    expect((await setting())!.value).toBe('10-20');
+
+    await send('/hours');
+    expect(reply()).toContain('10:00–20:00');
+  });
+
+  it('turns the window off, and the row outranks the env var', async () => {
+    await send('/hours off');
+    expect((await setting())!.value).toBe('off');
+
+    await send('/hours', testEnv({ GROUP_HOURS: '9-23' }));
+    expect(reply()).toContain('цілодобово');
+  });
+
+  it.each(['/hours evenings', '/hours 9-24', '/hours 9-9'])(
+    'rejects %s and writes nothing',
+    async (text) => {
+      await send(text);
+
+      expect(reply()).toContain('/hours 9-23');
+      expect(await setting()).toBeNull();
+    },
+  );
+
+  it('will not let a non-owner change it', async () => {
+    await handleWebhook(post(message('/hours off', { id: 999, type: 'private' }, 999)), testEnv());
+
+    expect(calls).toHaveLength(0);
+    expect(await setting()).toBeNull();
+  });
+});
+
+describe('/block, /unblock, /blocked', () => {
+  const setting = () =>
+    DB.prepare("SELECT value FROM settings WHERE key = 'blocked_sellers'").first<{ value: string }>();
+
+  const reply = () => String(calls.at(-1)!.body.text);
+
+  const send = (text: string, env = testEnv({ BLOCKED_SELLERS: 'retromagaz' })) =>
+    handleWebhook(post(message(text, { id: OWNER, type: 'private' })), env);
+
+  it('lists the env blocklist while no row is written', async () => {
+    await send('/blocked');
+
+    expect(reply()).toContain('retromagaz');
+    expect(await setting()).toBeNull();
+  });
+
+  it('keeps the env entries when the first /block is written', async () => {
+    // Writing only the new entry would silently unblock whoever the var names.
+    await send('/block 12345');
+
+    expect((await setting())!.value).toBe('retromagaz,12345');
+    expect(reply()).toContain('12345');
+  });
+
+  it('adds several at once and lowercases them', async () => {
+    await send('/block AtC, 999');
+
+    expect((await setting())!.value).toBe('retromagaz,atc,999');
+  });
+
+  it('says nothing changed when the entry is already there', async () => {
+    await send('/block retromagaz');
+
+    expect(reply()).toContain('Уже були в списку');
+  });
+
+  it('removes an entry the env var named', async () => {
+    await send('/unblock retromagaz');
+
+    expect((await setting())!.value).toBe('');
+    expect(reply()).toContain('Розблоковано');
+  });
+
+  it('reports an entry it could not find, and writes nothing', async () => {
+    await send('/unblock nobody');
+
+    expect(reply()).toContain('Не знайшов');
+    expect(await setting()).toBeNull();
+  });
+
+  it('reads the list back from the row on the next command', async () => {
+    await send('/block 12345');
+    await send('/unblock retromagaz');
+    await send('/blocked');
+
+    expect(reply()).toContain('12345');
+    expect(reply()).not.toContain('retromagaz');
+  });
+
+  it.each(['/block', '/unblock'])('rejects %s with no argument', async (text) => {
+    await send(text);
+
+    expect(reply()).toContain('Вкажи продавця');
+    expect(await setting()).toBeNull();
+  });
+
+  it('will not let a non-owner change the list', async () => {
+    await handleWebhook(post(message('/block 1', { id: 999, type: 'private' }, 999)), testEnv());
+
+    expect(calls).toHaveLength(0);
+    expect(await setting()).toBeNull();
+  });
+});
+
 describe('always answers 200', () => {
   it.each([
     ['a malformed body', new Request('https://worker.test/webhook', {

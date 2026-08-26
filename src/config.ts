@@ -1,3 +1,5 @@
+import { readSettings } from './db/settings';
+
 export interface Env {
   DB: D1Database;
 
@@ -19,6 +21,9 @@ export interface Env {
   MIN_SELLER_AGE_DAYS?: string;
   REQUIRE_SAFEDEAL?: string;
   REQUIRE_PRICE?: string;
+  ALLOW_BUSINESS_ADS?: string;
+  /** Hours groups and channels receive ads, e.g. "9-23". "off" means round the clock. */
+  GROUP_HOURS?: string;
   /** Shop slugs and/or seller ids to skip: "retromagaz,12345". */
   BLOCKED_SELLERS?: string;
 }
@@ -39,11 +44,35 @@ export interface Config {
   requireSafedeal: boolean;
   /** Skip ads that name no price — a bare "Договірна", an exchange, a giveaway. */
   requirePrice: boolean;
+  /** Let business sellers through too, instead of private sellers only. */
+  allowBusinessAds: boolean;
+  /** When groups and channels accept ads. null means round the clock. */
+  groupHours: HourWindow | null;
   /** Shop slugs and seller ids whose ads never go out. Lowercased, as strings. */
   blockedSellers: Set<string>;
   /** Everyone allowed to run commands. Reports go to all of them. */
   ownerChatIds: number[];
 }
+
+/**
+ * Keys of the runtime settings an owner flips from Telegram. Each one has an env
+ * var of the same meaning behind it, which is the default until a row is written.
+ */
+export const SETTING_ALLOW_BUSINESS_ADS = 'allow_business_ads';
+export const SETTING_GROUP_HOURS = 'group_hours';
+export const SETTING_BLOCKED_SELLERS = 'blocked_sellers';
+
+/** Half-open, [from, to): at "9-23" the 22:59 ad goes out and the 23:00 one does not. */
+export interface HourWindow {
+  from: number;
+  to: number;
+}
+
+/** The literal that turns the window off, accepted from the env var and /hours alike. */
+export const HOURS_OFF = 'off';
+
+/** Kyiv daytime. Groups fall back to this unless the var or a /hours row says otherwise. */
+export const DEFAULT_GROUP_HOURS: HourWindow = { from: 9, to: 23 };
 
 /** Subrequests kept aside for owner reports and failure notices. */
 export const SUBREQUEST_RESERVE = 5;
@@ -82,6 +111,29 @@ function threshold(value: string | undefined, fallback: number): number {
 function flag(value: string | undefined, fallback: boolean): boolean {
   if (!value?.trim()) return fallback;
   return /^(1|true|yes|on)$/i.test(value.trim());
+}
+
+/**
+ * "9-23" -> a window, "off" -> null (round the clock). Anything unreadable falls
+ * back to `fallback`, so a typo in the var cannot silently mute a group feed —
+ * only the explicit "off" can.
+ */
+export function parseGroupHours(
+  raw: string | undefined,
+  fallback: HourWindow | null,
+): HourWindow | null {
+  const value = raw?.trim().toLowerCase();
+  if (!value) return fallback;
+  if (value === HOURS_OFF) return null;
+
+  const match = /^(\d{1,2})\s*-\s*(\d{1,2})$/.exec(value);
+  if (!match) return fallback;
+
+  const from = Number(match[1]);
+  const to = Number(match[2]);
+  const valid = from >= 0 && from <= 23 && to >= 0 && to <= 23 && from !== to;
+
+  return valid ? { from, to } : fallback;
 }
 
 /** Accepts one id or several, separated by commas, spaces or newlines. */
@@ -130,7 +182,34 @@ export function readConfig(env: Env): Config {
     // On by default: an ad with no figure on it cannot be judged from the feed,
     // and a negotiable price still carries one, so this costs no real listings.
     requirePrice: flag(env.REQUIRE_PRICE, true),
+    // Off by default: a business ad is usually a shop's rolling stock, which is
+    // what buries the private listings this bot exists to catch.
+    allowBusinessAds: flag(env.ALLOW_BUSINESS_ADS, false),
+    // A group or channel is a shared space, so it goes quiet overnight; a private
+    // chat is one person's own feed and is never held back.
+    groupHours: parseGroupHours(env.GROUP_HOURS, DEFAULT_GROUP_HOURS),
     blockedSellers: parseBlockedSellers(env.BLOCKED_SELLERS),
     ownerChatIds: parseOwnerIds(env.OWNER_CHAT_ID),
   };
+}
+
+/**
+ * Env holds the defaults; a row in `settings` is an owner's runtime override and
+ * wins over it, so a toggle flipped from Telegram takes effect without a deploy.
+ * Costs one D1 read per tick and per command.
+ */
+export async function resolveConfig(env: Env, db: D1Database): Promise<Config> {
+  const config = readConfig(env);
+  const overrides = await readSettings(db);
+
+  const businessAds = overrides.get(SETTING_ALLOW_BUSINESS_ADS);
+  if (businessAds !== undefined) config.allowBusinessAds = flag(businessAds, config.allowBusinessAds);
+
+  const groupHours = overrides.get(SETTING_GROUP_HOURS);
+  if (groupHours !== undefined) config.groupHours = parseGroupHours(groupHours, config.groupHours);
+
+  const blocked = overrides.get(SETTING_BLOCKED_SELLERS);
+  if (blocked !== undefined) config.blockedSellers = parseBlockedSellers(blocked);
+
+  return config;
 }

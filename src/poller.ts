@@ -1,4 +1,4 @@
-import { readConfig, SUBREQUEST_RESERVE, type Config, type Env } from './config';
+import { resolveConfig, SUBREQUEST_RESERVE, type Config, type Env } from './config';
 import { activeChats, type ChatRow } from './db/chats';
 import { claimAd, filterUnseen, markSeenBatch, releaseAd } from './db/seen';
 import {
@@ -10,6 +10,7 @@ import {
   type SourceRow,
 } from './db/sources';
 import { fetchAds } from './olx/client';
+import { isChatOpen } from './schedule';
 import type { OlxAd } from './olx/types';
 import { TelegramClient } from './telegram/api';
 import { broadcastAd, type BroadcastDeps } from './telegram/broadcast';
@@ -82,6 +83,15 @@ const isTrusted = (ad: OlxAd, config: Config, now: number): boolean => {
 };
 
 /**
+ * OLX makes a seller declare private or business when posting the ad and sends the
+ * answer back as `business`. Nothing else in the payload carries it: most business
+ * ads have no shop slug and an empty company name, so the flag is the only way to
+ * keep the feed to private sellers.
+ */
+const isPrivateSeller = (ad: OlxAd, config: Config): boolean =>
+  config.allowBusinessAds || !ad.isBusinessSeller;
+
+/**
  * A named seller is muted outright, whatever else the ad looks like: a shop that
  * keeps reposting the same stock, or a profile that turned out to be a waste of
  * time. Matched on shop slug or account id, so both a shop and a private seller
@@ -147,9 +157,13 @@ async function processSource(
     return;
   }
 
+  // A /add-for-me search is one person's own watchlist, so it never reaches a
+  // group. Narrowed here rather than per tick: the same tick can carry both kinds.
+  const targets = source.private_only ? chats.filter((chat) => chat.type === 'private') : chats;
+
   // With nowhere to deliver, ads stay unseen rather than being silently consumed —
   // they go out once the bot is actually added somewhere.
-  if (chats.length === 0) return;
+  if (targets.length === 0) return;
 
   // The watermark rules out anything already overtaken; the age cutoff covers a
   // source that has never delivered, and caps how far back a stale watermark
@@ -165,6 +179,7 @@ async function processSource(
       isRecent(ad, floor) &&
       hasPrice(ad, config) &&
       isTrusted(ad, config, now) &&
+      isPrivateSeller(ad, config) &&
       !isBlocked(ad, config),
   );
 
@@ -178,7 +193,7 @@ async function processSource(
   for (const ad of fresh) {
     // Never start a broadcast we cannot finish: the ad stays unseen and is
     // picked up whole on the next tick.
-    if (state.budget - chats.length < state.reserve) break;
+    if (state.budget - targets.length < state.reserve) break;
     if (state.sends >= config.maxSendsPerTick) break;
 
     // Claimed before the first send, not after the last: filterUnseen ran once
@@ -187,7 +202,7 @@ async function processSource(
     // The claim is what makes two searches sharing an ad send it once.
     if (!(await claimAd(deps.db, source.id, ad.id))) continue;
 
-    const result = await broadcastAd(deps, chats, ad);
+    const result = await broadcastAd(deps, targets, ad);
     state.budget -= result.spent;
     state.sends += result.spent;
 
@@ -207,14 +222,19 @@ async function processSource(
 }
 
 export async function pollSources(env: Env): Promise<void> {
-  const config = readConfig(env);
+  const config = await resolveConfig(env, env.DB);
   const telegram = new TelegramClient(env.BOT_TOKEN);
   const deps: BroadcastDeps = { db: env.DB, telegram, timezone: config.timezone };
 
-  const [sources, chats] = await Promise.all([
+  const [sources, subscribed] = await Promise.all([
     pickDueSources(env.DB, config.maxSourcesPerTick),
     activeChats(env.DB),
   ]);
+
+  // Closed chats are dropped for this tick, not disabled. With none left open the
+  // sweep still runs and still records nothing, so the ads wait for the window.
+  const now = new Date();
+  const chats = subscribed.filter((chat) => isChatOpen(chat.type, config, now));
 
   const state: TickState = {
     budget: config.subrequestBudget,

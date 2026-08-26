@@ -97,6 +97,8 @@ interface AdFixture {
   sellerId?: number;
   /** Shop slug, as OLX sends it for a shop account. Private sellers get null. */
   shop?: string;
+  /** What the seller declared when posting. Omitted, as OLX does, for a private one. */
+  business?: boolean;
   safedeal?: string;
   /**
    * A figure, `'arranged'` for a "Договірна" with nothing behind it,
@@ -140,6 +142,7 @@ export function offersPayload(ads: AdFixture[]): unknown {
       title: ad.title ?? `Ad ${ad.id}`,
       description: 'Опис<br />другий рядок',
       created_time: ad.created ?? hoursAgo(1),
+      business: ad.business ?? false,
       params: [
         ...priceParams(ad.price),
         { key: 'state', value: { key: 'used', label: 'Вживане' } },

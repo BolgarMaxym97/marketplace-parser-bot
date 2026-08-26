@@ -39,8 +39,16 @@
 		"REQUIRE_SAFEDEAL": "false",
 		// Skip ads with no figure on them — a bare "Договірна", an exchange, a giveaway.
 		"REQUIRE_PRICE": "true",
+		// Whether ads from business accounts go out. Default off — private sellers only.
+		// This is the bootstrap value: /business on|off writes to the `settings` table
+		// and outranks it from then on.
+		"ALLOW_BUSINESS_ADS": "false",
+		// When groups and channels accept ads, in TIMEZONE. Half-open, so "9-23" stops
+		// at 22:59. "off" means round the clock. A private chat always ignores this.
+		"GROUP_HOURS": "9-23",
 		// Sellers whose ads never go out. Shop slug (retromagaz.olx.ua -> "retromagaz")
-		// or numeric OLX account id, separated by commas.
+		// or numeric OLX account id, separated by commas. Bootstrap value only:
+		// /block and /unblock write to `settings` and outrank it from then on.
 		"BLOCKED_SELLERS": "retromagaz"
 	},
 	"observability": {

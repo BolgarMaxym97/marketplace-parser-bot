@@ -2,31 +2,43 @@ import { env } from 'cloudflare:test';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Env } from '../src/config';
 import { pollSources } from '../src/poller';
-import { applySchema, daysAgo, hoursAgo, makeFetchStub, offersPayload, resetDb } from './helpers';
+import {
+  applySchema,
+  daysAgo,
+  hoursAgo,
+  makeFetchStub,
+  offersPayload,
+  resetDb,
+  type TelegramCall,
+} from './helpers';
 
 const DB = env.DB as D1Database;
 
 const API_URL = 'https://www.olx.ua/api/v1/offers?query=test&limit=50';
 
-async function seedSource(initialized: boolean, apiUrl: string = API_URL): Promise<number> {
+async function seedSource(
+  initialized: boolean,
+  apiUrl: string = API_URL,
+  privateOnly = false,
+): Promise<number> {
   const row = await DB.prepare(
-    `INSERT INTO sources (page_url, api_url, label, initialized, created_at)
-     VALUES ('https://www.olx.ua/uk/q-test/', ?, 'test', ?, 0)
+    `INSERT INTO sources (page_url, api_url, label, initialized, created_at, private_only)
+     VALUES ('https://www.olx.ua/uk/q-test/', ?, 'test', ?, 0, ?)
      RETURNING id`,
   )
-    .bind(apiUrl, initialized ? 1 : 0)
+    .bind(apiUrl, initialized ? 1 : 0, privateOnly ? 1 : 0)
     .first<{ id: number }>();
   return row!.id;
 }
 
+async function seedChat(id: number, type: string): Promise<void> {
+  await DB.prepare(`INSERT INTO chats (chat_id, type, title, added_at) VALUES (?, ?, 'c', 0)`)
+    .bind(id, type)
+    .run();
+}
+
 async function seedChats(...ids: number[]): Promise<void> {
-  for (const id of ids) {
-    await DB.prepare(
-      `INSERT INTO chats (chat_id, type, title, added_at) VALUES (?, 'channel', 'c', 0)`,
-    )
-      .bind(id)
-      .run();
-  }
+  for (const id of ids) await seedChat(id, 'channel');
 }
 
 const seenIds = async (sourceId: number): Promise<number[]> => {
@@ -431,6 +443,331 @@ describe('seller trust', () => {
     await pollSources(testEnv({ MIN_SELLER_AGE_DAYS: '30', REQUIRE_SAFEDEAL: 'true' }));
 
     expect(await seenIds(sourceId)).toEqual([410, 411, 412]);
+  });
+});
+
+describe('a private-only search', () => {
+  const targetsOf = (calls: TelegramCall[]): unknown[] =>
+    calls.filter((call) => call.method === 'sendMediaGroup').map((call) => call.body.chat_id);
+
+  it('reaches the private chat and skips the group', async () => {
+    await seedSource(true, API_URL, true);
+    await seedChat(777, 'private');
+    await seedChat(-100, 'supergroup');
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 800 }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    expect(targetsOf(stub.telegramCalls)).toEqual([777]);
+  });
+
+  it('delivers nothing and claims nothing when only a group is subscribed', async () => {
+    const sourceId = await seedSource(true, API_URL, true);
+    await seedChat(-100, 'channel');
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 801 }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(0);
+    expect(await seenIds(sourceId)).toEqual([]);
+  });
+
+  it('narrows only itself, leaving an ordinary search in the same tick alone', async () => {
+    const forMe = await seedSource(true, `${API_URL}&a=1`, true);
+    const shared = await seedSource(true, `${API_URL}&b=2`, false);
+    await seedChat(777, 'private');
+    await seedChat(-100, 'channel');
+
+    // Both return the same ad, and pickDueSources runs the least recently polled
+    // first — so the private-only one goes first and claims it.
+    await DB.prepare('UPDATE sources SET last_run_at = ? WHERE id = ?').bind(1, forMe).run();
+    await DB.prepare('UPDATE sources SET last_run_at = ? WHERE id = ?').bind(2, shared).run();
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 802 }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    // The group loses the ad to the private-only search: claims are per ad, not
+    // per chat, and this is the documented cost of an overlapping /add-for-me.
+    expect(targetsOf(stub.telegramCalls)).toEqual([777]);
+    expect(await seenIds(forMe)).toEqual([802]);
+    expect(await seenIds(shared)).toEqual([]);
+  });
+
+  it('lets the ordinary search reach the group when it claims the ad first', async () => {
+    const forMe = await seedSource(true, `${API_URL}&a=1`, true);
+    const shared = await seedSource(true, `${API_URL}&b=2`, false);
+    await seedChat(777, 'private');
+    await seedChat(-100, 'channel');
+
+    await DB.prepare('UPDATE sources SET last_run_at = ? WHERE id = ?').bind(2, forMe).run();
+    await DB.prepare('UPDATE sources SET last_run_at = ? WHERE id = ?').bind(1, shared).run();
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 804 }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    // activeChats orders by chat_id, so the group comes first.
+    expect(targetsOf(stub.telegramCalls)).toEqual([-100, 777]);
+    expect(await seenIds(shared)).toEqual([804]);
+    expect(await seenIds(forMe)).toEqual([]);
+  });
+
+  it('still initialises silently, even with no private chat subscribed', async () => {
+    const sourceId = await seedSource(false, API_URL, true);
+    await seedChat(-100, 'channel');
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 803 }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    expect(await seenIds(sourceId)).toEqual([803]);
+    expect(mediaGroups(stub.telegramCalls)).toBe(0);
+  });
+});
+
+describe('group hours', () => {
+  // Built from the real Kyiv hour rather than a fake clock: the ad fixtures are
+  // dated relative to Date.now(), and freezing it would push them past the cutoff.
+  const kyivHour = Number(
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Kyiv',
+      hour: '2-digit',
+      hour12: false,
+    }).format(new Date()),
+  ) % 24;
+
+  // Two hours wide, so a run that crosses an hour boundary mid-suite stays inside
+  // the window it was built for.
+  const openWindow = `${kyivHour}-${(kyivHour + 2) % 24}`;
+  const closedWindow = `${(kyivHour + 3) % 24}-${(kyivHour + 5) % 24}`;
+
+  it('holds a channel back outside the window and leaves the ad unclaimed', async () => {
+    const sourceId = await seedSource(true);
+    await seedChat(-100, 'channel');
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 700 }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ GROUP_HOURS: closedWindow }));
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(0);
+    // Not consumed — the tick inside the window still has to deliver it.
+    expect(await seenIds(sourceId)).toEqual([]);
+    expect(await watermark(sourceId)).toBeNull();
+  });
+
+  it('delivers on the next tick once the window is open', async () => {
+    const sourceId = await seedSource(true);
+    await seedChat(-100, 'channel');
+
+    const first = makeFetchStub({ offers: offersPayload([{ id: 701 }]) });
+    vi.stubGlobal('fetch', first.fetch);
+    await pollSources(testEnv({ GROUP_HOURS: closedWindow }));
+    expect(mediaGroups(first.telegramCalls)).toBe(0);
+
+    await DB.prepare('UPDATE sources SET last_run_at = NULL').run();
+
+    const second = makeFetchStub({ offers: offersPayload([{ id: 701 }]) });
+    vi.stubGlobal('fetch', second.fetch);
+    await pollSources(testEnv({ GROUP_HOURS: openWindow }));
+
+    expect(mediaGroups(second.telegramCalls)).toBe(1);
+    expect(await seenIds(sourceId)).toEqual([701]);
+  });
+
+  it('keeps sending to a private chat while a channel is closed', async () => {
+    await seedSource(true);
+    await seedChat(777, 'private');
+    await seedChat(-100, 'channel');
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 702 }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ GROUP_HOURS: closedWindow }));
+
+    const targets = stub.telegramCalls
+      .filter((call) => call.method === 'sendMediaGroup')
+      .map((call) => call.body.chat_id);
+
+    expect(targets).toEqual([777]);
+  });
+
+  it('ignores the window entirely once it is off', async () => {
+    await seedSource(true);
+    await seedChat(-100, 'channel');
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 703 }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ GROUP_HOURS: 'off' }));
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(1);
+  });
+
+  it('lets a settings row override the env window', async () => {
+    await seedSource(true);
+    await seedChat(-100, 'channel');
+
+    await DB.prepare("INSERT INTO settings (key, value, updated_at) VALUES ('group_hours', 'off', 0)").run();
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 704 }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ GROUP_HOURS: closedWindow }));
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(1);
+  });
+
+  it('still initialises a new source silently while every chat is closed', async () => {
+    const sourceId = await seedSource(false);
+    await seedChat(-100, 'channel');
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 705 }, { id: 706 }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ GROUP_HOURS: closedWindow }));
+
+    expect(await seenIds(sourceId)).toEqual([705, 706]);
+    expect(mediaGroups(stub.telegramCalls)).toBe(0);
+  });
+});
+
+describe('blocked sellers via settings', () => {
+  it('takes the blocklist from a settings row instead of the env var', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    await DB.prepare(
+      "INSERT INTO settings (key, value, updated_at) VALUES ('blocked_sellers', '55555', 0)",
+    ).run();
+
+    const stub = makeFetchStub({
+      offers: offersPayload([
+        { id: 710, title: 'row-blocked', sellerId: 55555 },
+        // Named by the env var, which the row replaces outright.
+        { id: 711, title: 'env-blocked', shop: 'retromagaz' },
+      ]),
+    });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ BLOCKED_SELLERS: 'retromagaz' }));
+
+    const captions = stub.telegramCalls
+      .filter((call) => call.method === 'sendMediaGroup')
+      .map((call) => String((call.body.media as Array<{ caption?: string }>)[0]?.caption));
+
+    expect(captions).toHaveLength(1);
+    expect(captions[0]).toContain('env-blocked');
+  });
+
+  it('blocks nobody when the row is empty, whatever the env var says', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    await DB.prepare(
+      "INSERT INTO settings (key, value, updated_at) VALUES ('blocked_sellers', '', 0)",
+    ).run();
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 712, shop: 'retromagaz' }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ BLOCKED_SELLERS: 'retromagaz' }));
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(1);
+  });
+});
+
+describe('business sellers', () => {
+  it('skips a business ad and keeps the private one', async () => {
+    const sourceId = await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({
+      offers: offersPayload([
+        { id: 600, title: 'business', business: true },
+        { id: 601, title: 'private', business: false },
+      ]),
+    });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    const captions = stub.telegramCalls
+      .filter((call) => call.method === 'sendMediaGroup')
+      .map((call) => String((call.body.media as Array<{ caption?: string }>)[0]?.caption));
+
+    expect(captions).toHaveLength(1);
+    expect(captions[0]).toContain('private');
+    // Rejected, not consumed — the next tick may see it again under a looser setting.
+    expect(await seenIds(sourceId)).toEqual([601]);
+  });
+
+  it('skips a business ad that carries no shop slug at all', async () => {
+    // The common shape on OLX, and the reason the shop slug cannot stand in for this.
+    await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 602, business: true }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(0);
+  });
+
+  it('sends business ads once ALLOW_BUSINESS_ADS is on', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 603, business: true }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ ALLOW_BUSINESS_ADS: 'true' }));
+
+    expect(mediaGroups(stub.telegramCalls)).toBe(1);
+  });
+
+  it('lets a settings row override the env default in both directions', async () => {
+    await seedSource(true);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 604, business: true }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await DB.prepare("INSERT INTO settings (key, value, updated_at) VALUES ('allow_business_ads', '1', 0)").run();
+    await pollSources(testEnv());
+    expect(mediaGroups(stub.telegramCalls)).toBe(1);
+
+    // And back: the row wins even when the env var says otherwise.
+    await DB.prepare("UPDATE settings SET value = '0' WHERE key = 'allow_business_ads'").run();
+    await DB.prepare('DELETE FROM seen_ads').run();
+    await DB.prepare('UPDATE sources SET last_created_at = 0, last_run_at = NULL').run();
+
+    const second = makeFetchStub({ offers: offersPayload([{ id: 605, business: true }]) });
+    vi.stubGlobal('fetch', second.fetch);
+
+    await pollSources(testEnv({ ALLOW_BUSINESS_ADS: 'true' }));
+    expect(mediaGroups(second.telegramCalls)).toBe(0);
+  });
+
+  it('still records a business ad on the first sweep', async () => {
+    const sourceId = await seedSource(false);
+    await seedChats(-100);
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 606, business: true }, { id: 607 }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    expect(await seenIds(sourceId)).toEqual([606, 607]);
   });
 });
 

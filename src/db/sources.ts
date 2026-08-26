@@ -11,6 +11,8 @@ export interface SourceRow {
   created_at: number;
   /** Creation time of the newest ad already broadcast, unix seconds. */
   last_created_at: number | null;
+  /** 1 when the search feeds private chats only — added with /add-for-me. */
+  private_only: number;
 }
 
 const now = (): number => Math.floor(Date.now() / 1000);
@@ -20,15 +22,16 @@ export async function addSource(
   pageUrl: string,
   apiUrl: string,
   label: string,
+  privateOnly: boolean,
 ): Promise<SourceRow | null> {
   return db
     .prepare(
-      `INSERT INTO sources (page_url, api_url, label, created_at)
-       VALUES (?, ?, ?, ?)
+      `INSERT INTO sources (page_url, api_url, label, created_at, private_only)
+       VALUES (?, ?, ?, ?, ?)
        ON CONFLICT (api_url) DO NOTHING
        RETURNING *`,
     )
-    .bind(pageUrl, apiUrl, label, now())
+    .bind(pageUrl, apiUrl, label, now(), privateOnly ? 1 : 0)
     .first<SourceRow>();
 }
 

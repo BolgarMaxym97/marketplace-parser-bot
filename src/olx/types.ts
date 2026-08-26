@@ -24,6 +24,8 @@ export interface OlxAd {
   shopSubdomain: string | null;
   /** OLX Доставка is on offer, so a buyer can pay through OLX rather than upfront. */
   safedealActive: boolean;
+  /** The seller declared a business account when posting, rather than a private one. */
+  isBusinessSeller: boolean;
   photoUrls: string[];
 }
 

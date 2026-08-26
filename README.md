@@ -61,6 +61,58 @@ The filter reads `value`, never the label, so a wording change on OLX's side can
 skipped one. A rejected ad is left unrecorded rather than consumed, exactly as with seller trust, and the
 first sweep of a new search still records it.
 
+## Private sellers only
+
+| Var | Default | Effect |
+|---|---|---|
+| `ALLOW_BUSINESS_ADS` | `false` | Whether ads from business accounts go out |
+
+OLX makes a seller pick **Приватна особа** or **Бізнес** when posting, and returns the answer as `business`
+on every offer. Nothing else in the payload substitutes for it: most business ads carry no shop slug and an
+empty `company_name`, so `shop.subdomain` would miss them. Confirmed against OLX's own `owner_type` filter —
+`owner_type=private` returns `business: false` for every result, `owner_type=business` returns `true`.
+
+Unlike the other filters this one is flipped at runtime with `/business on|off`, which writes to the
+`settings` table. The row outranks `ALLOW_BUSINESS_ADS` from then on; the var is only the bootstrap value.
+A rejected ad is left unrecorded rather than consumed, so flipping the switch back makes it eligible again
+while it is still inside the age cutoff.
+
+The filter runs after OLX has already picked the 50 newest offers, so in a category flooded with shop stock
+a fresh private ad can fall outside that window and never be seen. Narrowing the search — by category, price
+or region — is the fix; filtering server-side via `owner_type` would need every stored `api_url` rewritten.
+
+## Searches for one person only
+
+`/add-for-me` adds a search whose ads reach **private chats only** — a personal watchlist that a shared group
+is not woken by. The choice is stored on the source (`sources.private_only`), so it holds for every later
+tick, and `/list` marks such a search with 👤. The group window above is irrelevant to it: a private chat is
+always open, so an `/add-for-me` feed effectively runs round the clock.
+
+Deduplication is global, and that has a consequence worth knowing. When a `/add-for-me` search and an
+ordinary one both match the same ad, whichever the tick reaches first claims it — and if that is the
+private-only search, **the group never sees that ad**. Claims are per ad, not per chat. Keep the two kinds of
+search from overlapping if the group's feed matters.
+
+`api_url` is unique, so `/add-for-me` on a search that already exists reports it instead of switching the
+flag: silently moving a group's feed is worse than saying `/rm <id>` and adding it again.
+
+## Quiet hours for groups
+
+| Var | Default | Effect |
+|---|---|---|
+| `GROUP_HOURS` | `9-23` | When groups and channels accept ads, in `TIMEZONE`. `off` = round the clock |
+
+A group or channel is a shared space, so it keeps daytime hours; a **private chat is one person's own feed
+and is never held back**. The window is half-open — at `9-23` the last ad of the day lands at 22:59 — and one
+whose end is below its start wraps past midnight, so `22-6` is a valid night window. `/hours` sets it at
+runtime.
+
+The window filters the broadcast targets, not the ads. When every subscribed chat is closed nothing is
+claimed, so the ads simply wait for the next tick inside the window — provided they are still in the newest
+50 offers and inside `MAX_AD_AGE_HOURS`. When a private chat is subscribed alongside a closed group the ad
+goes out to the private chat and is claimed there, and **the group does not get it later**: delivery is
+tracked per ad, not per chat. A new search still initialises silently while every chat is closed.
+
 ## Blocked sellers
 
 | Var | Default | Effect |
@@ -70,6 +122,11 @@ first sweep of a new search still records it.
 An entry is either a shop slug — the `retromagaz` of `retromagaz.olx.ua` — or a numeric OLX account id,
 which is how a private seller with no shop page is named. Matching is case-insensitive and, as with the
 other filters, a rejected ad is left unrecorded rather than consumed.
+
+`/block` and `/unblock` edit the list at runtime. The first `/block` starts from the set currently in force —
+the env var, until a row exists — so nothing the var names is silently unblocked. From then on the row
+replaces the var outright, an empty row included: to go back to the var, `/unblock` is not enough, the row
+has to be deleted from the `settings` table.
 
 ## Setup
 
@@ -130,26 +187,33 @@ wholesale, so include yourself if you want to stay.
 | Command | Effect |
 |---|---|
 | `/add <url>` | Add a search — an OLX results page, or an `api/v1/offers` URL directly |
-| `/list` | Searches with status, last run and failure count |
+| `/add-for-me <url>` | The same, but its ads reach private chats only |
+| `/list` | Searches with status, last run and failure count; 👤 marks a private-only one |
 | `/rm <id>` | Delete a search and its history |
 | `/pause <id>` / `/resume <id>` | Toggle polling; resume clears the failure counter |
 | `/test <id>` | Render the newest ad into the current chat, writing nothing to history |
+| `/business [on\|off]` | Ads from business accounts; no argument reports the current state |
+| `/hours [9-23\|off]` | When groups and channels receive ads; no argument reports the window |
+| `/blocked` | The blocklist in force |
+| `/block <slug\|id>` | Block a seller; several at once are accepted |
+| `/unblock <slug\|id>` | Unblock a seller |
 | `/chats` | Broadcast targets |
 | `/subscribe` / `/unsubscribe` | Opt the current chat in or out of the broadcast |
-| `/status` | Counts of searches, chats and history rows |
+| `/status` | Counts of searches, chats and history rows, plus the runtime settings |
 
 ## Tests
 
 ```bash
-npm test            # 137 tests, no network
+npm test            # 222 tests, no network
 npm run test:live   # hits olx.ua: resolve → API → render
 npm run typecheck
 ```
 
 `npm test` covers rendering against a captured `/api/v1/offers` response, the page-state resolver,
-deduplication across searches, claim contention, silent initialisation, the seller-trust and price filters,
-subrequest-budget exhaustion, Telegram `429`, a kicked chat, forum-topic routing, webhook auth and access
-control, and history retention.
+deduplication across searches, claim contention, silent initialisation, the seller-trust, price and
+private-seller filters, the group window, private-only searches, the runtime settings and the commands that
+write them, subrequest-budget exhaustion, Telegram `429`, a kicked chat, forum-topic routing, webhook auth
+and access control, and history retention.
 
 The fixture in `test/fixtures/offers.json` is a real OLX response with seller identities pseudonymised.
 

@@ -29,6 +29,7 @@ interface RawAd {
   url?: string;
   description?: string;
   created_time?: string;
+  business?: boolean;
   params?: RawParam[];
   photos?: RawPhoto[];
   location?: { city?: RawPlace | null; region?: RawPlace | null } | null;
@@ -127,6 +128,7 @@ export function mapAds(payload: unknown, size: string): OlxAd[] {
       sellerCreatedTime: raw.user?.created ?? null,
       shopSubdomain: raw.shop?.subdomain?.trim().toLowerCase() || null,
       safedealActive: raw.safedeal?.status === 'active',
+      isBusinessSeller: raw.business === true,
       photoUrls: photoUrls(raw.photos, size),
     });
   }

@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { isOwner, parseBlockedSellers, parseOwnerIds, readConfig, type Env } from '../src/config';
+import {
+  isOwner,
+  parseBlockedSellers,
+  parseGroupHours,
+  parseOwnerIds,
+  readConfig,
+  type Env,
+} from '../src/config';
 
 describe('parseOwnerIds', () => {
   it('reads a single id', () => {
@@ -117,5 +124,34 @@ describe('parseBlockedSellers', () => {
     expect(parseBlockedSellers(undefined).size).toBe(0);
     expect(parseBlockedSellers('  ').size).toBe(0);
     expect(readConfig({} as Env).blockedSellers.size).toBe(0);
+  });
+});
+
+describe('parseGroupHours', () => {
+  const fallback = { from: 9, to: 23 };
+
+  it('reads a window', () => {
+    expect(parseGroupHours('9-23', null)).toEqual({ from: 9, to: 23 });
+    expect(parseGroupHours('22 - 6', null)).toEqual({ from: 22, to: 6 });
+  });
+
+  it('turns the window off only on the explicit word', () => {
+    expect(parseGroupHours('off', fallback)).toBeNull();
+    expect(parseGroupHours('OFF', fallback)).toBeNull();
+  });
+
+  it.each([
+    ['unset', undefined],
+    ['blank', '   '],
+    ['nonsense', 'evenings'],
+    ['an hour out of range', '9-24'],
+    ['a window of zero length', '9-9'],
+  ])('falls back on %s, so a typo cannot mute a group feed', (_name, raw) => {
+    expect(parseGroupHours(raw, fallback)).toEqual(fallback);
+  });
+
+  it('defaults to Kyiv daytime', () => {
+    expect(readConfig({} as Env).groupHours).toEqual({ from: 9, to: 23 });
+    expect(readConfig({ GROUP_HOURS: 'off' } as Env).groupHours).toBeNull();
   });
 });

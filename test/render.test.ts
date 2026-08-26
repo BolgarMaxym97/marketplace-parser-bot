@@ -58,6 +58,12 @@ describe('mapAds on the real /api/v1/offers response', () => {
     expect(ads[0]!.shopSubdomain).toBeNull();
   });
 
+  it('reads the private/business declaration, which no shop slug backs up', () => {
+    // Both of these have shop.subdomain null; only `business` tells them apart.
+    expect(ads[0]!.isBusinessSeller).toBe(true);
+    expect(ads[3]!.isBusinessSeller).toBe(false);
+  });
+
   it('lowercases the shop slug so it matches a blocklist entry', () => {
     const [ad] = mapAds(
       {
@@ -205,6 +211,7 @@ describe('renderAd', () => {
     sellerCreatedTime: '2015-05-18T14:01:19+03:00',
     shopSubdomain: null,
     safedealActive: true,
+    isBusinessSeller: false,
     photoUrls: ['https://example.test/a.jpg'],
   };
 

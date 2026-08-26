@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { fetchAds } from '../src/olx/client';
 import { resolveSearchUrl } from '../src/olx/resolve';
 import { renderAd } from '../src/render/message';
-import { MAX_CAPTION } from '../src/config';
+import { BROWSER_HEADERS, MAX_CAPTION } from '../src/config';
 
 /**
  * Hits olx.ua for real. Excluded from `npm test`; run with `npm run test:live`.
@@ -31,5 +31,23 @@ describe('live OLX', () => {
     }
 
     console.log('--- sample caption ---\n' + renderAd(ads[0]!, 'Europe/Kyiv').caption);
+  }, 60_000);
+
+  /**
+   * The private/business declaration is what keeps shops out of the feed, and the
+   * mapper coerces a missing `business` to false — which would silently let every
+   * shop through. Only the raw payload can prove the field is still being sent, so
+   * this reads it directly instead of going through mapAds.
+   */
+  it('still receives the private/business flag on every offer', async () => {
+    const { apiUrl } = await resolveSearchUrl(PAGE_URL);
+
+    const response = await fetch(apiUrl, {
+      headers: { ...BROWSER_HEADERS, accept: 'application/json' },
+    });
+    const { data } = (await response.json()) as { data: Array<Record<string, unknown>> };
+
+    expect(data.length).toBeGreaterThan(0);
+    expect(data.every((offer) => typeof offer.business === 'boolean')).toBe(true);
   }, 60_000);
 });

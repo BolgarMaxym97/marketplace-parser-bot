@@ -1,4 +1,4 @@
-import { isOwner, readConfig, type Env } from '../config';
+import { isOwner, resolveConfig, type Env } from '../config';
 import { disableChat, upsertChat } from '../db/chats';
 import { TelegramClient } from './api';
 import { runCommand } from './commands';
@@ -22,7 +22,7 @@ async function handleMembership(db: D1Database, update: TgChatMemberUpdated): Pr
 }
 
 async function handleMessage(env: Env, message: TgMessage): Promise<void> {
-  const config = readConfig(env);
+  const config = await resolveConfig(env, env.DB);
   const telegram = new TelegramClient(env.BOT_TOKEN);
   const text = message.text ?? '';
 
