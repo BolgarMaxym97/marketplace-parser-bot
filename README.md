@@ -128,6 +128,18 @@ the env var, until a row exists — so nothing the var names is silently unblock
 replaces the var outright, an empty row included: to go back to the var, `/unblock` is not enough, the row
 has to be deleted from the `settings` table.
 
+## When OLX fails
+
+A failed sweep is sorted by who is at fault. An OLX `5xx`, an anti-bot `403`, a `408`/`429`, a timeout or an
+HTML page where JSON was due is OLX having a bad moment: the search is **never disabled** for it. Its next poll
+is pushed out instead — 5, 10, 20, 40 minutes, then every `MAX_BACKOFF_MINUTES` (60) — so an outage costs a
+few subrequests, and the first successful sweep puts the search back on the normal five-minute cycle. Owners
+hear about it once, when the failures in a row reach `MAX_FAILURES`, and once more when it recovers; `/list`
+shows when the next attempt is due.
+
+A `400`, `404` or `410` means the search URL itself is dead. That disables the search after `MAX_FAILURES`
+in a row, as before, and needs `/resume` or `/rm`.
+
 ## Setup
 
 ```bash
@@ -188,7 +200,7 @@ wholesale, so include yourself if you want to stay.
 |---|---|
 | `/add <url>` | Add a search — an OLX results page, or an `api/v1/offers` URL directly |
 | `/add-for-me <url>` | The same, but its ads reach private chats only |
-| `/list` | Searches with status, last run and failure count; 👤 marks a private-only one |
+| `/list` | Searches with status, last run, failure count and next retry; 👤 marks a private-only one |
 | `/rm <id>` | Delete a search and its history |
 | `/pause <id>` / `/resume <id>` | Toggle polling; resume clears the failure counter |
 | `/test <id>` | Render the newest ad into the current chat, writing nothing to history |
@@ -204,7 +216,7 @@ wholesale, so include yourself if you want to stay.
 ## Tests
 
 ```bash
-npm test            # 222 tests, no network
+npm test            # 234 tests, no network
 npm run test:live   # hits olx.ua: resolve → API → render
 npm run typecheck
 ```
@@ -212,7 +224,7 @@ npm run typecheck
 `npm test` covers rendering against a captured `/api/v1/offers` response, the page-state resolver,
 deduplication across searches, claim contention, silent initialisation, the seller-trust, price and
 private-seller filters, the group window, private-only searches, the runtime settings and the commands that
-write them, subrequest-budget exhaustion, Telegram `429`, a kicked chat, forum-topic routing, webhook auth
+write them, subrequest-budget exhaustion, OLX outages with backoff and self-recovery, Telegram `429`, a kicked chat, forum-topic routing, webhook auth
 and access control, and history retention.
 
 The fixture in `test/fixtures/offers.json` is a real OLX response with seller identities pseudonymised.

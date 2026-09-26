@@ -17,6 +17,7 @@ export interface Env {
   TIMEZONE?: string;
   RETENTION_PER_SOURCE?: string;
   MAX_FAILURES?: string;
+  MAX_BACKOFF_MINUTES?: string;
   MAX_AD_AGE_HOURS?: string;
   MIN_SELLER_AGE_DAYS?: string;
   REQUIRE_SAFEDEAL?: string;
@@ -36,6 +37,8 @@ export interface Config {
   timezone: string;
   retentionPerSource: number;
   maxFailures: number;
+  /** Ceiling on the retry delay after transient OLX failures. */
+  maxBackoffMinutes: number;
   /** How old an ad may be, by creation date, and still count as new. */
   maxAdAgeHours: number;
   /** Sellers who registered more recently than this are skipped. 0 turns the check off. */
@@ -87,6 +90,9 @@ export const MAX_CAPTION = 1024;
 export const SEND_DELAY_MS = 1100;
 
 export const FETCH_TIMEOUT_MS = 10_000;
+
+/** First retry delay after a transient OLX failure: one cron interval. */
+export const BACKOFF_BASE_SECONDS = 300;
 
 /** Sent to OLX so the request does not look like a naked script. */
 export const BROWSER_HEADERS: Record<string, string> = {
@@ -174,6 +180,7 @@ export function readConfig(env: Env): Config {
     timezone: env.TIMEZONE || 'Europe/Kyiv',
     retentionPerSource: num(env.RETENTION_PER_SOURCE, 500),
     maxFailures: num(env.MAX_FAILURES, 5),
+    maxBackoffMinutes: num(env.MAX_BACKOFF_MINUTES, 60),
     maxAdAgeHours: num(env.MAX_AD_AGE_HOURS, 24),
     minSellerAgeDays: threshold(env.MIN_SELLER_AGE_DAYS, 30),
     // Off by default: OLX Доставка only exists for shippable goods, so requiring

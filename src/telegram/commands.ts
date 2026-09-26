@@ -121,6 +121,9 @@ async function handleList(ctx: CommandContext): Promise<string> {
       ];
       if (source.fail_count > 0) lines.push(`   ⚠️ помилок поспіль: ${source.fail_count}`);
       if (source.last_error) lines.push(`   ${source.last_error}`);
+      if (source.enabled && source.next_run_at) {
+        lines.push(`   ⏳ наступна спроба: ${formatTime(source.next_run_at, ctx.config.timezone)}`);
+      }
       return lines.join('\n');
     })
     .join('\n');

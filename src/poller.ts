@@ -1,4 +1,10 @@
-import { resolveConfig, SUBREQUEST_RESERVE, type Config, type Env } from './config';
+import {
+  BACKOFF_BASE_SECONDS,
+  resolveConfig,
+  SUBREQUEST_RESERVE,
+  type Config,
+  type Env,
+} from './config';
 import { activeChats, type ChatRow } from './db/chats';
 import { claimAd, filterUnseen, markSeenBatch, releaseAd } from './db/seen';
 import {
@@ -9,7 +15,7 @@ import {
   pickDueSources,
   type SourceRow,
 } from './db/sources';
-import { fetchAds } from './olx/client';
+import { fetchAds, isTransient } from './olx/client';
 import { isChatOpen } from './schedule';
 import type { OlxAd } from './olx/types';
 import { TelegramClient } from './telegram/api';
@@ -221,6 +227,38 @@ async function processSource(
   if (delivered > 0) await advanceWatermark(deps.db, source.id, delivered);
 }
 
+/**
+ * Records a failed sweep and warns the owners exactly once, on the tick the
+ * failure count reaches the threshold. Returns the subrequests it spent.
+ */
+async function reportFailure(
+  db: D1Database,
+  telegram: TelegramClient,
+  config: Config,
+  source: SourceRow,
+  error: unknown,
+): Promise<number> {
+  const reason = error instanceof Error ? error.message : String(error);
+  const transient = isTransient(error);
+
+  const failures = await markFailure(db, source.id, reason, {
+    transient,
+    maxFailures: config.maxFailures,
+    backoffBaseSeconds: BACKOFF_BASE_SECONDS,
+    backoffMaxSeconds: config.maxBackoffMinutes * 60,
+  });
+  if (failures !== config.maxFailures) return 0;
+
+  const text = transient
+    ? `⏳ Пошук #${source.id} «${source.label ?? ''}» не відповідає ${failures} разів поспіль.\n` +
+      `Остання: ${reason}\nСхоже на збій OLX — повторюю з паузою до ${config.maxBackoffMinutes} хв, ` +
+      `відновиться сам. Напишу, коли запрацює.`
+    : `⚠️ Пошук #${source.id} «${source.label ?? ''}» вимкнено після ${failures} помилок поспіль.\n` +
+      `Остання: ${reason}\nПеревір і зроби /resume ${source.id} або /rm ${source.id}.`;
+
+  return notifyOwners(telegram, config, text);
+}
+
 export async function pollSources(env: Env): Promise<void> {
   const config = await resolveConfig(env, env.DB);
   const telegram = new TelegramClient(env.BOT_TOKEN);
@@ -250,19 +288,18 @@ export async function pollSources(env: Env): Promise<void> {
     try {
       await processSource(deps, config, chats, source, state);
       await markSuccess(env.DB, source.id);
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error);
-      const failures = await markFailure(env.DB, source.id, reason, config.maxFailures);
 
-      // Warn exactly once, on the tick the source is auto-disabled.
-      if (failures === config.maxFailures) {
+      // Only a source that had been reported down is reported back up, so a
+      // one-tick blip stays silent both ways.
+      if (source.fail_count >= config.maxFailures) {
         state.budget -= await notifyOwners(
           telegram,
           config,
-          `⚠️ Пошук #${source.id} «${source.label ?? ''}» вимкнено після ${failures} помилок поспіль.\n` +
-            `Остання: ${reason}\nПеревір і зроби /resume ${source.id} або /rm ${source.id}.`,
+          `✅ Пошук #${source.id} «${source.label ?? ''}» знову працює після ${source.fail_count} помилок поспіль.`,
         );
       }
+    } catch (error) {
+      state.budget -= await reportFailure(env.DB, telegram, config, source, error);
     }
   }
 }

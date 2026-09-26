@@ -119,7 +119,7 @@ describe('multiple owners', () => {
     const stub = makeFetchStub({ offers: offersPayload([]) });
     const failing = (async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = typeof input === 'string' ? input : (input as Request).url;
-      if (url.includes('/api/v1/offers')) return new Response('nope', { status: 500 });
+      if (url.includes('/api/v1/offers')) return new Response('nope', { status: 404 });
       return stub.fetch(input, init);
     }) as unknown as typeof fetch;
     vi.stubGlobal('fetch', failing);
@@ -1109,34 +1109,189 @@ describe('Telegram failures', () => {
   });
 });
 
+const sourceRow = (id: number) =>
+  DB.prepare('SELECT enabled, fail_count, last_error, last_run_at, next_run_at FROM sources WHERE id = ?')
+    .bind(id)
+    .first<{
+      enabled: number;
+      fail_count: number;
+      last_error: string | null;
+      last_run_at: number | null;
+      next_run_at: number | null;
+    }>();
+
+/** Every OLX request fails the given way; Telegram still goes to the stub. */
+function stubOlxFailure(respond: () => Response | Promise<Response>) {
+  const stub = makeFetchStub({ offers: offersPayload([]) });
+  const failing = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = typeof input === 'string' ? input : (input as Request).url;
+    if (url.includes('/api/v1/offers')) {
+      stub.olxCalls.push(url);
+      return respond();
+    }
+    return stub.fetch(input, init);
+  }) as unknown as typeof fetch;
+  vi.stubGlobal('fetch', failing);
+  return stub;
+}
+
+/** Stands in for the wait: makes a backing-off source due again. */
+const makeDue = (id: number) =>
+  DB.prepare('UPDATE sources SET next_run_at = NULL WHERE id = ?').bind(id).run();
+
+const ownerTexts = (calls: TelegramCall[]): string[] =>
+  calls.filter((call) => call.method === 'sendMessage').map((call) => String(call.body.text));
+
 describe('source failures', () => {
-  it('counts failures, disables at the threshold and warns the owner once', async () => {
+  it('disables a dead search at the threshold and warns the owner once', async () => {
     const sourceId = await seedSource(true);
     await seedChats(-100);
 
-    const stub = makeFetchStub({ offers: offersPayload([]) });
-    const failing = (async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = typeof input === 'string' ? input : (input as Request).url;
-      if (url.includes('/api/v1/offers')) return new Response('nope', { status: 403 });
-      return stub.fetch(input, init);
-    }) as unknown as typeof fetch;
-    vi.stubGlobal('fetch', failing);
+    const stub = stubOlxFailure(() => new Response('gone', { status: 404 }));
 
     for (let attempt = 0; attempt < 3; attempt++) {
       await pollSources(testEnv({ MAX_FAILURES: '3' }));
     }
 
-    const row = await DB.prepare('SELECT enabled, fail_count, last_error FROM sources WHERE id = ?')
-      .bind(sourceId)
-      .first<{ enabled: number; fail_count: number; last_error: string }>();
-
+    const row = await sourceRow(sourceId);
     expect(row!.fail_count).toBe(3);
     expect(row!.enabled).toBe(0);
-    expect(row!.last_error).toContain('403');
+    expect(row!.next_run_at).toBeNull();
+    expect(row!.last_error).toContain('404');
+
+    const warnings = ownerTexts(stub.telegramCalls).filter((text) => text.includes('вимкнено'));
+    expect(warnings).toHaveLength(1);
+  });
+
+  it.each([500, 502, 503, 403, 429])('never disables a search over HTTP %i', async (status) => {
+    const sourceId = await seedSource(true);
+    await seedChats(-100);
+
+    stubOlxFailure(() => new Response('down', { status }));
+
+    for (let attempt = 0; attempt < 7; attempt++) {
+      await pollSources(testEnv({ MAX_FAILURES: '3' }));
+      await makeDue(sourceId);
+    }
+
+    const row = await sourceRow(sourceId);
+    expect(row!.enabled).toBe(1);
+    expect(row!.fail_count).toBe(7);
+    expect(row!.last_error).toContain(String(status));
+  });
+
+  it('treats a timeout, a dropped connection and an HTML page as transient', async () => {
+    const failures: Array<() => Response> = [
+      () => {
+        throw new DOMException('The operation was aborted due to timeout', 'TimeoutError');
+      },
+      () => {
+        throw new TypeError('Network connection lost.');
+      },
+      () => new Response('<html>maintenance</html>', { status: 200 }),
+    ];
+
+    for (const failure of failures) {
+      await resetDb(DB);
+      const sourceId = await seedSource(true);
+      stubOlxFailure(failure);
+
+      await pollSources(testEnv({ MAX_FAILURES: '1' }));
+
+      const row = await sourceRow(sourceId);
+      expect(row!.enabled).toBe(1);
+      expect(row!.next_run_at).not.toBeNull();
+    }
+  });
+
+  it('doubles the retry delay with each transient failure, up to the ceiling', async () => {
+    const sourceId = await seedSource(true);
+    stubOlxFailure(() => new Response('down', { status: 500 }));
+
+    const delays: number[] = [];
+    for (let attempt = 0; attempt < 6; attempt++) {
+      await pollSources(testEnv({ MAX_BACKOFF_MINUTES: '60' }));
+      const row = await sourceRow(sourceId);
+      delays.push(row!.next_run_at! - row!.last_run_at!);
+      await makeDue(sourceId);
+    }
+
+    expect(delays).toEqual([300, 600, 1200, 2400, 3600, 3600]);
+  });
+
+  it('keeps the delay capped however long the outage lasts', async () => {
+    const sourceId = await seedSource(true);
+    await DB.prepare('UPDATE sources SET fail_count = 200 WHERE id = ?').bind(sourceId).run();
+    stubOlxFailure(() => new Response('down', { status: 500 }));
+
+    await pollSources(testEnv({ MAX_BACKOFF_MINUTES: '30' }));
+
+    const row = await sourceRow(sourceId);
+    expect(row!.next_run_at! - row!.last_run_at!).toBe(1800);
+  });
+
+  it('skips a search until its retry is due', async () => {
+    const sourceId = await seedSource(true);
+    await DB.prepare('UPDATE sources SET next_run_at = ? WHERE id = ?')
+      .bind(Math.floor(Date.now() / 1000) + 600, sourceId)
+      .run();
+
+    const stub = makeFetchStub({ offers: offersPayload([]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv());
+
+    expect(stub.olxCalls).toHaveLength(0);
+  });
+
+  it('warns every owner once about an outage, without calling the search disabled', async () => {
+    const sourceId = await seedSource(true);
+    const stub = stubOlxFailure(() => new Response('down', { status: 503 }));
+
+    for (let attempt = 0; attempt < 4; attempt++) {
+      await pollSources(testEnv({ OWNER_CHAT_ID: '777,888', MAX_FAILURES: '2' }));
+      await makeDue(sourceId);
+    }
 
     const warnings = stub.telegramCalls.filter(
-      (call) => call.method === 'sendMessage' && String(call.body.text).includes('вимкнено'),
+      (call) => call.method === 'sendMessage' && String(call.body.text).startsWith('⏳'),
     );
-    expect(warnings).toHaveLength(1);
+    expect(warnings.map((call) => call.body.chat_id)).toEqual([777, 888]);
+    expect(ownerTexts(stub.telegramCalls).some((text) => text.includes('вимкнено'))).toBe(false);
+  });
+
+  it('resumes by itself after an outage and tells the owner', async () => {
+    const sourceId = await seedSource(true);
+    await seedChats(-100);
+    await DB.prepare(
+      `UPDATE sources SET fail_count = 5, last_error = 'OLX responded with HTTP 500' WHERE id = ?`,
+    )
+      .bind(sourceId)
+      .run();
+
+    const stub = makeFetchStub({ offers: offersPayload([{ id: 1 }]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ MAX_FAILURES: '5' }));
+
+    const row = await sourceRow(sourceId);
+    expect(row!.fail_count).toBe(0);
+    expect(row!.last_error).toBeNull();
+    expect(row!.next_run_at).toBeNull();
+    expect(mediaGroups(stub.telegramCalls)).toBe(1);
+    expect(ownerTexts(stub.telegramCalls).filter((text) => text.startsWith('✅'))).toHaveLength(1);
+  });
+
+  it('stays quiet when a search recovers from a failure nobody was told about', async () => {
+    const sourceId = await seedSource(true);
+    await DB.prepare('UPDATE sources SET fail_count = 1 WHERE id = ?').bind(sourceId).run();
+
+    const stub = makeFetchStub({ offers: offersPayload([]) });
+    vi.stubGlobal('fetch', stub.fetch);
+
+    await pollSources(testEnv({ MAX_FAILURES: '5' }));
+
+    expect(ownerTexts(stub.telegramCalls)).toEqual([]);
+    expect((await sourceRow(sourceId))!.fail_count).toBe(0);
   });
 });

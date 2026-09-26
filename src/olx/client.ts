@@ -45,6 +45,24 @@ export class OlxHttpError extends Error {
   }
 }
 
+/** 403 is OLX's anti-bot wall, not a verdict on the search; 408 and 429 pass with time. */
+const TRANSIENT_CLIENT_STATUSES = new Set([403, 408, 429]);
+
+/**
+ * Whether a failed fetch is OLX having a bad moment rather than the search being
+ * broken. A transient failure is retried with backoff and never disables a source:
+ * an outage hits every search at once, and muting them all over it is what used to
+ * need a /resume for each. Only a 4xx that names the request itself — 400, 404,
+ * 410 — says the search URL is dead.
+ *
+ * Anything that is not an HTTP status is a timeout, a dropped connection or an
+ * HTML error page where JSON was due, all of which are OLX's side.
+ */
+export function isTransient(error: unknown): boolean {
+  if (!(error instanceof OlxHttpError)) return true;
+  return error.status >= 500 || TRANSIENT_CLIENT_STATUSES.has(error.status);
+}
+
 interface AdPrice {
   label: string;
   /** null when the ad names no figure — that is what makes it filterable. */
